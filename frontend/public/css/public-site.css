@@ -640,15 +640,20 @@ strong {
 }
 
 .home-hero-copy h1 {
-    max-width: 48rem;
+    max-width: 42rem;
     margin-bottom: 1.5rem;
-    font-size: clamp(3rem, 6vw, 6.25rem);
+    font-size: clamp(3rem, 4.2vw, 4.5rem);
     font-weight: 820;
-    line-height: 1.02;
+    line-height: 1.04;
+}
+
+.home-hero-copy h1 span,
+.home-hero-copy h1 em {
+    display: block;
+    white-space: nowrap;
 }
 
 .home-hero-copy h1 em {
-    display: block;
     color: var(--site-accent);
     font-style: normal;
 }
@@ -894,43 +899,41 @@ strong {
     white-space: nowrap;
 }
 
-.signal-float-card {
-    position: absolute;
-    z-index: 3;
-    right: -1.5rem;
-    bottom: -0.7rem;
-    display: grid;
-    min-width: 12rem;
-    padding: 1rem 1.1rem;
-    border: 1px solid rgba(255, 255, 255, 0.35);
-    border-radius: 1rem;
-    background: rgba(246, 252, 255, 0.96);
-    box-shadow: 0 18px 40px rgba(1, 9, 22, 0.28);
-    grid-template-columns: auto 1fr;
-    gap: 0.2rem 0.55rem;
+.signal-assurance {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    padding: 0.72rem 0.85rem;
+    border: 1px solid rgba(34, 211, 238, 0.17);
+    border-radius: 0.75rem;
+    background: rgba(2, 15, 37, 0.34);
+    gap: 0.8rem 1.15rem;
 }
 
-.signal-float-card > span {
-    grid-column: 1 / -1;
-    margin-bottom: 0.3rem;
-    color: var(--site-blue-700);
+.signal-assurance > span {
+    margin-right: auto;
+    color: rgba(255, 255, 255, 0.5);
     font-size: 0.58rem;
     font-weight: 850;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
 }
 
-.signal-float-card strong {
-    color: var(--site-ink);
-    font-size: 0.75rem;
-    letter-spacing: -0.01em;
+.signal-assurance strong {
+    display: inline-flex;
+    align-items: center;
+    color: rgba(255, 255, 255, 0.76);
+    font-size: 0.68rem;
+    font-weight: 700;
+    white-space: nowrap;
 }
 
-.signal-float-card i {
-    width: 1px;
-    height: 0.9rem;
-    background: var(--site-line);
-    grid-column: 1;
-    grid-row: 2 / span 2;
+.signal-assurance i {
+    width: 0.35rem;
+    height: 0.35rem;
+    margin-right: 0.4rem;
+    border-radius: 50%;
+    background: var(--site-accent);
+    box-shadow: 0 0 0 0.22rem rgba(34, 211, 238, 0.1);
 }
 
 .home-positioning {
@@ -3804,10 +3807,6 @@ strong {
         gap: 3rem;
     }
 
-    .signal-float-card {
-        right: -0.5rem;
-    }
-
     .solution-flow-preview {
         gap: 0.45rem;
     }
@@ -4195,12 +4194,14 @@ strong {
         display: none;
     }
 
-    .signal-float-card {
-        position: relative;
-        right: auto;
-        bottom: auto;
-        width: fit-content;
-        margin: 0.75rem 0 0 auto;
+    .signal-assurance {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    .signal-assurance > span {
+        margin-right: 0;
+        grid-column: 1 / -1;
     }
 
     .positioning-grid,
