@@ -154,6 +154,69 @@ img {
     transform: translateY(0);
 }
 
+.app-boot-screen {
+    display: none;
+}
+
+body.app-booting {
+    overflow: hidden;
+    background: var(--skin-page-bg);
+}
+
+body.app-booting .skip-link,
+body.app-booting .app-layout,
+body.app-booting .loading-layer,
+body.app-booting .toast-region {
+    visibility: hidden;
+}
+
+body.app-booting .app-boot-screen {
+    position: fixed;
+    z-index: 3000;
+    inset: 0;
+    display: grid;
+    min-height: 100vh;
+    min-height: 100dvh;
+    place-items: center;
+    color: #fff;
+    background: var(--skin-page-bg);
+}
+
+.app-boot-brand {
+    display: flex;
+    align-items: center;
+    flex-direction: column;
+    padding: 28px;
+    text-align: center;
+}
+
+.app-boot-brand img {
+    width: 132px;
+    margin-bottom: 34px;
+    filter: brightness(0) invert(1);
+}
+
+.app-boot-brand strong {
+    margin-top: 18px;
+    font-size: 1rem;
+    letter-spacing: -0.02em;
+}
+
+.app-boot-brand small {
+    margin-top: 6px;
+    color: #b8c9df;
+    font-size: 0.78rem;
+}
+
+.app-boot-spinner {
+    width: 30px;
+    height: 30px;
+    border: 3px solid rgb(255 255 255 / 0.2);
+    border-top-color: var(--skin-accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+}
+
 .app-layout {
     display: grid;
     grid-template-columns: var(--sidebar-width) minmax(0, 1fr);
