@@ -401,6 +401,52 @@
         }, { passive: true });
     }
 
+    function bindProductGallery() {
+        const dialog = document.getElementById("productScreenshotDialog");
+        const image = document.getElementById("productLightboxImage");
+        const title = document.getElementById("productLightboxTitle");
+        const description = document.getElementById("productLightboxDescription");
+        const closeButton = dialog?.querySelector("[data-product-shot-close]");
+        const triggers = document.querySelectorAll("[data-product-shot]");
+        let returnFocus = null;
+
+        if (!dialog || !image || !title || !description || !triggers.length) return;
+
+        const closeDialog = () => {
+            if (dialog.open) dialog.close();
+        };
+
+        triggers.forEach((trigger) => {
+            trigger.addEventListener("click", () => {
+                const source = trigger.dataset.shotSrc;
+                if (!source) return;
+                if (typeof dialog.showModal !== "function") {
+                    window.open(source, "_blank", "noopener,noreferrer");
+                    return;
+                }
+
+                returnFocus = trigger;
+                image.src = source;
+                image.alt = `${trigger.dataset.shotTitle || "제품"} 실제 화면 원본`;
+                title.textContent = trigger.dataset.shotTitle || "제품 화면";
+                description.textContent = trigger.dataset.shotDescription || "";
+                document.body.classList.add("product-lightbox-open");
+                dialog.showModal();
+                window.requestAnimationFrame(() => closeButton?.focus());
+            });
+        });
+
+        closeButton?.addEventListener("click", closeDialog);
+        dialog.addEventListener("click", (event) => {
+            if (event.target === dialog) closeDialog();
+        });
+        dialog.addEventListener("close", () => {
+            document.body.classList.remove("product-lightbox-open");
+            returnFocus?.focus();
+            returnFocus = null;
+        });
+    }
+
     async function loadSiteSkin() {
         const controller = new AbortController();
         const timeoutId = window.setTimeout(() => controller.abort(), 3500);
@@ -464,6 +510,7 @@
         bindRouteLinks();
         bindMenu();
         bindHeader();
+        bindProductGallery();
 
         const year = document.getElementById("siteCopyrightYear");
         if (year) year.textContent = String(new Date().getFullYear());

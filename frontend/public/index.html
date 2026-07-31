@@ -563,79 +563,32 @@
                         <div class="product-keywords"><span>EXPLAINABLE</span><span>HUMAN-IN-THE-LOOP</span><span>TRACEABLE</span></div>
                     </div>
                 </div>
-                <figure class="product-workspace">
-                    <div class="product-workspace-bar">
-                        <div class="workspace-window-controls" aria-hidden="true"><i></i><i></i><i></i></div>
-                        <div class="workspace-product-name">
-                            <span>iNIT</span>
-                            <strong>Data Editing System</strong>
-                            <small>Quality Operations Workspace</small>
-                        </div>
-                        <div class="workspace-run-state"><i></i> SYSTEM READY</div>
+                <div class="product-proof-hero">
+                    <div class="product-proof-copy">
+                        <p class="product-live-label"><i aria-hidden="true"></i> ACTUAL PRODUCT INTERFACE</p>
+                        <h3>운영 현장에서 실행되는<br>데이터 품질 시스템</h3>
+                        <p>프로젝트와 Target DB를 연결하고, 시나리오별 Flow 실행 현황과 성공·실패 이력을 한 화면에서 관리합니다.</p>
+                        <dl class="product-proof-facts">
+                            <div><dt>01</dt><dd><strong>PROJECT</strong><span>업무별 데이터 편집 시나리오</span></dd></div>
+                            <div><dt>02</dt><dd><strong>RUN TRACE</strong><span>실행·성공·실패 이력 추적</span></dd></div>
+                            <div><dt>03</dt><dd><strong>TARGET DB</strong><span>분석 대상과 결과 데이터 연결</span></dd></div>
+                        </dl>
                     </div>
-                    <div class="product-workspace-body">
-                        <aside class="workspace-sidebar" aria-label="제품 화면 메뉴 예시">
-                            <div class="workspace-project-mark">DQ</div>
-                            <nav>
-                                <span class="is-active"><i>01</i>Overview</span>
-                                <span><i>02</i>Projects</span>
-                                <span><i>03</i>Target DB</span>
-                                <span><i>04</i>Data Work</span>
-                                <span><i>05</i>Flow Work</span>
-                                <span><i>06</i>Model Lab</span>
-                            </nav>
-                            <div class="workspace-user">
-                                <i>OP</i>
-                                <span><strong>Quality Operator</strong><small>Human Review</small></span>
-                            </div>
-                        </aside>
-                        <div class="workspace-main">
-                            <div class="workspace-title-row">
-                                <div>
-                                    <span>PROJECT / NATIONAL DATA QUALITY</span>
-                                    <h3>행정자료 품질 검증 Flow</h3>
-                                    <p>RUN-20260731-0042 · Oracle Target DB</p>
-                                </div>
-                                <span class="workspace-run-button" aria-hidden="true">Run workflow</span>
-                            </div>
-                            <div class="workspace-metrics">
-                                <article><small>INPUT ROWS</small><strong>1,248,320</strong><span>원본 스냅샷</span></article>
-                                <article><small>RULE CANDIDATES</small><strong>184</strong><span>설명 가능한 후보</span></article>
-                                <article><small>VIOLATIONS</small><strong>2,916</strong><span>0.23% 검토 대상</span></article>
-                                <article><small>REVIEWED</small><strong>87%</strong><span>전문가 확정</span></article>
-                            </div>
-                            <div class="workspace-canvas">
-                                <div class="workspace-canvas-head">
-                                    <span>FLOW CANVAS</span>
-                                    <div><i class="is-live"></i>RUN TRACE ON <i></i>GRID</div>
-                                </div>
-                                <div class="workspace-flow" aria-label="Input, Profile, Rule Mining, Detect, Review 순서의 제품 Flow 예시">
-                                    <div class="workspace-flow-line" aria-hidden="true"></div>
-                                    <article class="flow-node is-complete"><span>01</span><i>IN</i><div><small>INPUT</small><strong>Source Snapshot</strong><em>1.24M rows</em></div></article>
-                                    <article class="flow-node is-complete"><span>02</span><i>PF</i><div><small>PROFILE</small><strong>Type &amp; Relation</strong><em>42 columns</em></div></article>
-                                    <article class="flow-node is-running"><span>03</span><i>RM</i><div><small>DISCOVER</small><strong>Rule Mining</strong><em>184 candidates</em></div></article>
-                                    <article class="flow-node"><span>04</span><i>DT</i><div><small>DETECT</small><strong>Violation Scan</strong><em>2,916 records</em></div></article>
-                                    <article class="flow-node"><span>05</span><i>RV</i><div><small>GOVERN</small><strong>Expert Review</strong><em>Approve / Reject</em></div></article>
-                                </div>
-                                <div class="workspace-rule-panel">
-                                    <div>
-                                        <span>SELECTED RULE / R-0184</span>
-                                        <strong>IF 지역코드 = 행정구역 THEN 우편번호 권역 일치</strong>
-                                        <p>Support 0.842 · Confidence 0.973 · Lift 1.118</p>
-                                    </div>
-                                    <div class="workspace-rule-result">
-                                        <span><small>PASS</small><strong>1,245,404</strong></span>
-                                        <span><small>REVIEW</small><strong>2,916</strong></span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    <figcaption>
-                        <span>PRODUCT VIEW</span>
-                        프로젝트 정의부터 규칙 발굴, 위반 탐지와 전문가 검토까지 하나의 실행 이력으로 연결하는 화면 구성
-                    </figcaption>
-                </figure>
+                    <button
+                        class="product-screen product-screen-primary"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="productScreenshotDialog"
+                        data-product-shot
+                        data-shot-src="/public/assets/data-editing/dashboard.png"
+                        data-shot-title="운영 대시보드"
+                        data-shot-description="시나리오 실행 추이, 성공률, 최근 Run과 공지사항을 확인하는 실제 메인 화면입니다."
+                    >
+                        <span class="product-screen-bar"><i></i><i></i><i></i><strong>INIT Data Editing System</strong><em>LIVE PRODUCT</em></span>
+                        <span class="product-screen-image"><img src="/public/assets/data-editing/dashboard.png" alt="데이터 에디팅 시스템 운영 대시보드 실제 화면" loading="lazy" decoding="async"></span>
+                        <span class="product-screen-caption"><small>OPERATIONS OVERVIEW</small><strong>운영 대시보드</strong><em>화면 크게 보기 ↗</em></span>
+                    </button>
+                </div>
             </section>
 
             <section class="site-section product-journey-section">
@@ -653,6 +606,89 @@
                     <li><span>06</span><div><small>ORCHESTRATE</small><h3>시각적 Flow 자동화</h3><p>분석 단계를 DAG로 설계하고 같은 Run 결과와 데이터 계약을 연결해 재현성을 확보합니다.</p></div></li>
                     <li><span>07</span><div><small>GOVERN</small><h3>전문가 검토·수정·운영 반영</h3><p>원본을 보존한 편집본에서 수정하고 검증된 DML만 운영에 반영하며 전체 이력을 남깁니다.</p></div></li>
                 </ol>
+            </section>
+
+            <section class="site-section product-gallery-section">
+                <div class="site-section-heading heading-split">
+                    <div>
+                        <p class="site-eyebrow site-eyebrow-light"><span></span> PRODUCT IN ACTION</p>
+                        <h2>화면으로 확인하는<br>실제 제품 여정</h2>
+                    </div>
+                    <p>단순한 분석 시연이 아니라 Flow 설계, 규칙 근거 확인, 위반 데이터 검토, 모델 운영과 AI 도움말까지 연결된 업무 시스템입니다. 각 화면을 선택하면 원본 크기로 확인할 수 있습니다.</p>
+                </div>
+                <div class="product-gallery">
+                    <button
+                        class="product-gallery-card product-gallery-card-wide"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="productScreenshotDialog"
+                        data-product-shot
+                        data-shot-src="/public/assets/data-editing/flow-designer.png"
+                        data-shot-title="시각적 Flow 설계"
+                        data-shot-description="컬럼 유형 분석부터 상관 분석, 자동 규칙 발굴과 위반 탐지를 DAG 형태로 설계하고 실행합니다."
+                    >
+                        <span class="product-gallery-index">01 / ORCHESTRATE</span>
+                        <span class="product-gallery-image"><img src="/public/assets/data-editing/flow-designer.png" alt="데이터 에디팅 시스템 Flow 설계 실제 화면" loading="lazy" decoding="async"></span>
+                        <span class="product-gallery-copy"><strong>시각적 Flow 설계</strong><span>분석 노드를 연결하고 검증·실행·예약까지 관리</span><i>확대 ↗</i></span>
+                    </button>
+                    <button
+                        class="product-gallery-card product-gallery-card-tall"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="productScreenshotDialog"
+                        data-product-shot
+                        data-shot-src="/public/assets/data-editing/relation-graph.png"
+                        data-shot-title="컬럼 관계망 탐색"
+                        data-shot-description="연결 강도와 군집을 조정하며 컬럼 관계를 그래프로 탐색하는 실제 분석 화면입니다."
+                    >
+                        <span class="product-gallery-index">02 / RELATION</span>
+                        <span class="product-gallery-image"><img src="/public/assets/data-editing/relation-graph.png" alt="컬럼 관계망 분석 그래프 실제 화면" loading="lazy" decoding="async"></span>
+                        <span class="product-gallery-copy"><strong>컬럼 관계망 탐색</strong><span>군집과 연결 강도로 변수 구조 파악</span><i>확대 ↗</i></span>
+                    </button>
+                    <button
+                        class="product-gallery-card"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="productScreenshotDialog"
+                        data-product-shot
+                        data-shot-src="/public/assets/data-editing/analysis-results.png"
+                        data-shot-title="Run 단위 통합 결과"
+                        data-shot-description="실행 이력과 노드별 성공 상태, 모델 및 규칙 결과를 한 화면에서 검토합니다."
+                    >
+                        <span class="product-gallery-index">03 / ANALYZE</span>
+                        <span class="product-gallery-image"><img src="/public/assets/data-editing/analysis-results.png" alt="통합 에디팅 결과분석 실제 화면" loading="lazy" decoding="async"></span>
+                        <span class="product-gallery-copy"><strong>Run 단위 통합 결과</strong><span>노드별 결과와 규칙 근거를 한 흐름으로 추적</span><i>확대 ↗</i></span>
+                    </button>
+                    <button
+                        class="product-gallery-card"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="productScreenshotDialog"
+                        data-product-shot
+                        data-shot-src="/public/assets/data-editing/model-training.png"
+                        data-shot-title="모델 학습·버전 운영"
+                        data-shot-description="확정 라벨을 학습하고 지표 비교, 후보 모델 활성화와 버전 이력을 관리합니다."
+                    >
+                        <span class="product-gallery-index">04 / MODEL OPS</span>
+                        <span class="product-gallery-image"><img src="/public/assets/data-editing/model-training.png" alt="컬럼 유형 모델 학습 관리 실제 화면" loading="lazy" decoding="async"></span>
+                        <span class="product-gallery-copy"><strong>모델 학습·버전 운영</strong><span>정확도 지표와 활성 모델을 통제</span><i>확대 ↗</i></span>
+                    </button>
+                    <button
+                        class="product-gallery-card product-gallery-card-wide product-gallery-card-ai"
+                        type="button"
+                        aria-haspopup="dialog"
+                        aria-controls="productScreenshotDialog"
+                        data-product-shot
+                        data-shot-src="/public/assets/data-editing/ai-help.png"
+                        data-shot-title="화면 문맥 기반 AI 도움말"
+                        data-shot-description="현재 메뉴의 도움말과 렌더링 정보를 문맥으로 연결해 사용자의 질문에 답변합니다."
+                    >
+                        <span class="product-gallery-index">05 / AI ASSIST</span>
+                        <span class="product-gallery-image"><img src="/public/assets/data-editing/ai-help.png" alt="현재 화면과 Gemini 도움말이 연결된 실제 제품 화면" loading="lazy" decoding="async"></span>
+                        <span class="product-gallery-copy"><strong>화면 문맥 기반 AI 도움말</strong><span>현재 메뉴와 기능을 이해하는 내장형 업무 지원</span><i>확대 ↗</i></span>
+                    </button>
+                </div>
+                <p class="product-gallery-note"><i aria-hidden="true"></i> 위 이미지는 개발·검증 환경에서 직접 실행한 INIT Data Editing System 화면입니다.</p>
             </section>
 
             <section class="site-section product-difference-section">
@@ -1001,6 +1037,24 @@
             <a class="site-button site-button-primary" href="/" data-site-route>홈으로 이동</a>
         </section>
     </main>
+
+    <dialog id="productScreenshotDialog" class="product-lightbox" aria-labelledby="productLightboxTitle" aria-describedby="productLightboxDescription">
+        <div class="product-lightbox-panel">
+            <header>
+                <div>
+                    <span>INIT DATA EDITING SYSTEM</span>
+                    <h2 id="productLightboxTitle">제품 화면</h2>
+                    <p id="productLightboxDescription"></p>
+                </div>
+                <button type="button" data-product-shot-close aria-label="제품 화면 닫기">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"></path></svg>
+                </button>
+            </header>
+            <div class="product-lightbox-image">
+                <img id="productLightboxImage" src="/public/assets/data-editing/dashboard.png" alt="">
+            </div>
+        </div>
+    </dialog>
 
     <footer id="siteFooter" class="site-footer">
         <div class="site-footer-top">
