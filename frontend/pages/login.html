@@ -1,0 +1,182 @@
+<section class="login-page" id="page-login" aria-labelledby="loginTitle">
+    <div class="login-shell">
+        <section class="login-intro">
+            <div class="login-grid-pattern" aria-hidden="true"></div>
+            <div class="login-intro-copy">
+                <div class="login-brand-row">
+                    <img class="login-logo" src="./assets/init-logo.png" alt="INIT">
+                    <span class="login-brand-badge">DATA INTELLIGENCE</span>
+                </div>
+                <p id="loginHeroEyebrow" class="login-hero-eyebrow">AI × NATIONAL STATISTICS</p>
+                <h1 id="loginTitle">
+                    <span class="login-title-line">국가통계를 읽는 AI,</span>
+                    <span class="login-title-line">미래를 설계하는 인사이트</span>
+                </h1>
+                <p id="loginHeroDescription" class="login-hero-description">공식 통계와 인공지능 분석을 연결해 정책과 산업의 다음 결정을 더 빠르고 정확하게 만듭니다.</p>
+                <div class="login-capability-list" aria-label="핵심 전문 분야">
+                    <span>국가통계 시스템</span>
+                    <span>AI·통계 분석</span>
+                    <span>데이터 품질 운영</span>
+                </div>
+            </div>
+
+            <div class="login-data-visual" aria-hidden="true">
+                <div class="login-data-visual-head">
+                    <span id="loginSignalLabel">NATIONAL DATA SIGNAL</span>
+                    <strong><i></i> READY</strong>
+                </div>
+                <div class="login-data-chart">
+                    <span style="--bar-size: 42%"></span>
+                    <span style="--bar-size: 64%"></span>
+                    <span style="--bar-size: 51%"></span>
+                    <span style="--bar-size: 78%"></span>
+                    <span style="--bar-size: 68%"></span>
+                    <span style="--bar-size: 92%"></span>
+                    <span style="--bar-size: 84%"></span>
+                    <svg viewBox="0 0 480 120" preserveAspectRatio="none">
+                        <polyline points="0,91 70,78 135,82 205,54 275,63 350,31 420,40 480,15"></polyline>
+                    </svg>
+                </div>
+                <div class="login-data-visual-foot">
+                    <span><strong>PROFILE</strong> 데이터 구조</span>
+                    <span><strong>RULE</strong> 설명 가능한 규칙</span>
+                    <span><strong>TRACE</strong> 검증 이력</span>
+                </div>
+            </div>
+
+            <footer class="login-intro-footer">
+                <small id="loginAppName">웹 사이트</small>
+                <span>AI & Statistics Intelligence Platform</span>
+            </footer>
+        </section>
+
+        <section class="login-card" aria-labelledby="loginFormTitle">
+            <header>
+                <p class="login-card-eyebrow">SECURE ACCESS</p>
+                <h2 id="loginFormTitle">인사이트 플랫폼 로그인</h2>
+                <p>승인된 계정으로 안전하게 접속하세요.</p>
+            </header>
+
+            <form id="loginForm" class="login-form">
+                <label class="field">
+                    <span class="required">로그인 ID</span>
+                    <input id="loginId" class="input" type="text" required maxlength="100" autocomplete="username" data-page-focus>
+                </label>
+                <label class="field">
+                    <span class="required">비밀번호</span>
+                    <input id="loginPassword" class="input" type="password" maxlength="1024" required autocomplete="current-password">
+                </label>
+                <p id="loginStatus" class="inline-status" aria-live="polite"></p>
+                <button id="loginSubmitButton" class="button button-primary" type="submit">로그인</button>
+            </form>
+
+            <div class="login-support-links" aria-label="계정 지원">
+                <button id="openSignupButton" class="login-support-link" type="button">
+                    <span class="login-support-icon" aria-hidden="true">＋</span>
+                    <span>
+                        <strong>새 계정 신청</strong>
+                        <small>서비스 이용 권한 요청</small>
+                    </span>
+                </button>
+                <button id="openAdminContactButton" class="login-support-link" type="button">
+                    <span class="login-support-icon" aria-hidden="true">?</span>
+                    <span>
+                        <strong>로그인 지원</strong>
+                        <small>계정·비밀번호 문의</small>
+                    </span>
+                </button>
+            </div>
+
+            <p class="login-security-note"><span aria-hidden="true">●</span> 모든 접속은 서버 세션 기반으로 안전하게 보호됩니다.</p>
+            <a class="login-public-link" href="/">
+                회사 홈페이지로 이동
+                <svg viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M5 12h13M14 7l5 5-5 5"></path>
+                </svg>
+            </a>
+        </section>
+    </div>
+
+    <dialog id="signupDialog" class="dialog">
+        <form id="signupForm">
+            <header class="dialog-header">
+                <div>
+                    <h2>회원가입</h2>
+                    <p>관리자 가입을 선택하면 초기 관리자 키가 필요합니다.</p>
+                </div>
+                <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>
+            </header>
+            <div class="dialog-body">
+                <div class="form-grid">
+                    <label class="field">
+                        <span class="required">로그인 ID</span>
+                        <input id="signupLoginId" class="input" type="text" maxlength="100" required autocomplete="username">
+                    </label>
+                    <label class="field">
+                        <span class="required">이름</span>
+                        <input id="signupUserName" class="input" type="text" maxlength="200" required autocomplete="name">
+                    </label>
+                    <label class="field field-span">
+                        <span class="required">이메일</span>
+                        <input id="signupEmail" class="input" type="email" maxlength="300" required autocomplete="email">
+                    </label>
+                    <label class="field">
+                        <span class="required">비밀번호</span>
+                        <input id="signupPassword" class="input" type="password" minlength="8" maxlength="1024" required autocomplete="new-password">
+                    </label>
+                    <label class="field">
+                        <span class="required">비밀번호 확인</span>
+                        <input id="signupPasswordConfirm" class="input" type="password" minlength="8" maxlength="1024" required autocomplete="new-password">
+                    </label>
+                    <label class="field field-span">
+                        <span class="required">가입 유형</span>
+                        <select id="signupRoleCode" class="select">
+                            <option value="USER">일반 사용자</option>
+                            <option value="ADMIN">관리자</option>
+                        </select>
+                    </label>
+                    <label id="signupAdminKeyField" class="field field-span" hidden>
+                        <span class="required">초기 관리자 키</span>
+                        <input id="signupAdminKey" class="input" type="password" maxlength="1024" autocomplete="off">
+                        <small class="field-help">관리자 가입 권한은 서버에서 다시 검증합니다.</small>
+                    </label>
+                </div>
+                <p id="signupStatus" class="inline-status" aria-live="polite"></p>
+            </div>
+            <footer class="dialog-footer">
+                <button class="button button-secondary" type="button" data-dialog-close>취소</button>
+                <button class="button button-primary" type="submit">가입 신청</button>
+            </footer>
+        </form>
+    </dialog>
+
+    <dialog id="adminContactDialog" class="dialog">
+        <header class="dialog-header">
+            <div>
+                <h2>로그인 도움</h2>
+                <p>비밀번호 재설정이 필요하면 관리자에게 문의하세요.</p>
+            </div>
+            <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>
+        </header>
+        <div class="dialog-body">
+            <dl id="adminContactList" class="contact-list">
+                <div>
+                    <dt>담당자</dt>
+                    <dd id="adminContactName">확인 중</dd>
+                </div>
+                <div>
+                    <dt>이메일</dt>
+                    <dd id="adminContactEmail">-</dd>
+                </div>
+                <div>
+                    <dt>전화</dt>
+                    <dd id="adminContactPhone">-</dd>
+                </div>
+            </dl>
+            <p id="adminContactStatus" class="inline-status" aria-live="polite"></p>
+        </div>
+        <footer class="dialog-footer">
+            <button class="button button-primary" type="button" data-dialog-close>확인</button>
+        </footer>
+    </dialog>
+</section>

@@ -1,0 +1,73 @@
+<section class="page" id="page-account" aria-labelledby="accountTitle">
+    <header class="page-header">
+        <div>
+            <h2 id="accountTitle">내 계정</h2>
+            <p>프로필 정보와 로그인 비밀번호를 안전하게 관리합니다.</p>
+        </div>
+        <div class="page-actions">
+            <button id="accountReloadButton" class="button button-secondary" type="button">다시 불러오기</button>
+        </div>
+    </header>
+
+    <section class="panel" aria-labelledby="profileTitle">
+        <div class="panel-header">
+            <div>
+                <h3 id="profileTitle">프로필</h3>
+                <p>로그인 ID와 권한은 관리자가 관리합니다.</p>
+            </div>
+        </div>
+        <form id="profileForm">
+            <div class="form-grid">
+                <label class="field">
+                    <span>로그인 ID</span>
+                    <input id="accountLoginId" class="input" type="text" readonly>
+                </label>
+                <label class="field">
+                    <span>권한</span>
+                    <input id="accountRoleCode" class="input" type="text" readonly>
+                </label>
+                <label class="field">
+                    <span class="required">이름</span>
+                    <input id="accountUserName" class="input" type="text" maxlength="200" required autocomplete="name">
+                </label>
+                <label class="field">
+                    <span class="required">이메일</span>
+                    <input id="accountEmail" class="input" type="email" maxlength="300" required autocomplete="email">
+                </label>
+            </div>
+            <p id="profileStatus" class="inline-status" aria-live="polite"></p>
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">프로필 저장</button>
+            </div>
+        </form>
+    </section>
+
+    <section class="panel" aria-labelledby="passwordTitle">
+        <div class="panel-header">
+            <div>
+                <h3 id="passwordTitle">비밀번호 변경</h3>
+                <p>8자 이상의 새 비밀번호를 사용해 주세요.</p>
+            </div>
+        </div>
+        <form id="passwordForm">
+            <div class="form-grid">
+                <label class="field field-span">
+                    <span class="required">현재 비밀번호</span>
+                    <input id="currentPassword" class="input" type="password" maxlength="1024" required autocomplete="current-password">
+                </label>
+                <label class="field">
+                    <span class="required">새 비밀번호</span>
+                    <input id="newPassword" class="input" type="password" minlength="8" maxlength="1024" required autocomplete="new-password">
+                </label>
+                <label class="field">
+                    <span class="required">새 비밀번호 확인</span>
+                    <input id="newPasswordConfirm" class="input" type="password" minlength="8" maxlength="1024" required autocomplete="new-password">
+                </label>
+            </div>
+            <p id="passwordStatus" class="inline-status" aria-live="polite"></p>
+            <div class="form-actions">
+                <button class="button button-primary" type="submit">비밀번호 변경</button>
+            </div>
+        </form>
+    </section>
+</section>

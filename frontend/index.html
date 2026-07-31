@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="ko" data-home-skin="national-intelligence">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light">
+    <title>웹 사이트</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <link rel="icon" href="data:,">
+    <script src="./config/app.config.js" defer></script>
+    <script src="./config/menu.config.js" defer></script>
+    <script src="./js/common.js" defer></script>
+    <script src="./js/app.js" defer></script>
+</head>
+<body class="app-booting">
+    <a class="skip-link" href="#pageHost">본문으로 바로가기</a>
+
+    <div class="app-layout">
+        <aside id="appSidebar" class="app-sidebar" aria-label="주 메뉴">
+            <div class="app-brand">
+                <img src="./assets/init-logo.png" alt="" class="app-brand-logo">
+                <span id="appBrandName">웹 사이트</span>
+                <button id="sidebarClose" class="sidebar-close mobile-only" type="button" aria-label="메뉴 닫기">
+                    <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M6 6l12 12M18 6 6 18"></path>
+                    </svg>
+                </button>
+            </div>
+
+            <nav id="appNavigation" class="app-navigation"></nav>
+
+            <div class="app-sidebar-footer">
+                <span id="sidebarUserName">로그인 사용자</span>
+                <small id="sidebarUserRole"></small>
+            </div>
+        </aside>
+
+        <button id="sidebarBackdrop" class="sidebar-backdrop" type="button" aria-label="메뉴 닫기" hidden></button>
+
+        <section class="app-main">
+            <header id="appHeader" class="app-header">
+                <div class="app-header-leading">
+                    <button id="sidebarToggle" class="icon-button mobile-only" type="button" aria-label="메뉴 열기" aria-controls="appSidebar" aria-expanded="false">
+                        <svg class="menu-icon" viewBox="0 0 24 24" aria-hidden="true">
+                            <path d="M5 7h14M5 12h14M5 17h14"></path>
+                        </svg>
+                    </button>
+                    <div>
+                        <p id="appHeaderEyebrow" class="app-header-eyebrow">웹 사이트</p>
+                        <h1 id="pageTitle">홈</h1>
+                    </div>
+                </div>
+                <div class="app-header-actions">
+                    <span id="headerUserName" class="header-user-name"></span>
+                    <button id="refreshPageButton" class="button button-quiet" type="button">새로고침</button>
+                    <button id="logoutButton" class="button button-secondary" type="button">로그아웃</button>
+                </div>
+            </header>
+
+            <main id="pageHost" class="page-host" tabindex="-1" aria-live="polite"></main>
+        </section>
+    </div>
+
+    <div id="appLoading" class="loading-layer" role="status" aria-live="polite" hidden>
+        <div class="loading-card">
+            <span class="loading-spinner" aria-hidden="true"></span>
+            <div>
+                <strong>처리 중입니다</strong>
+                <span id="loadingMessage">잠시만 기다려 주세요.</span>
+            </div>
+        </div>
+    </div>
+
+    <section id="toastRegion" class="toast-region" aria-label="알림" aria-live="polite" aria-atomic="false"></section>
+
+    <noscript>이 사이트를 사용하려면 JavaScript를 활성화해 주세요.</noscript>
+</body>
+</html>

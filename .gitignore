@@ -1,0 +1,49 @@
+# Python
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# Local environment and secrets
+.env
+.env.*
+!.env.example
+*.env.local
+.envrc
+secrets/
+.secrets/
+secreats/
+.secreats/
+etc/secrets/
+instantclient/
+.instantclient/
+
+# Oracle Wallets, certificates, and local installers
+Wallet*/
+wallet*/
+Wallet_*.zip
+*Wallet*.zip
+*wallet*.zip
+*.pem
+*.key
+*.p12
+*.pfx
+*.jks
+*.whl
+
+# Runtime output
+*.log
+test-results/
+coverage/
+htmlcov/
+
+# Local Codex notes and generated captures
+prompt/
+screenshots/
+
+# OS files
+.DS_Store
+Thumbs.db
