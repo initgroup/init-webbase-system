@@ -161,6 +161,31 @@ git remote add origin https://github.com/initgroup/init-webbase-system.git
 
 JavaScript 검증에는 Node.js가 있을 때 `node --check`를 사용합니다. Node.js가 없어도 웹 애플리케이션 실행에는 영향이 없으며 검증 매크로는 해당 단계만 건너뜁니다.
 
+## Render 자동 배포
+
+이 프로젝트는 `data-editing-system`과 동일하게 GitHub의 `main` 브랜치를 Render Web Service에 직접 연결합니다. Render에서 새 Web Service를 만들 때 다음 값을 사용합니다.
+
+| 설정 | 값 |
+| --- | --- |
+| Repository | `https://github.com/initgroup/init-webbase-system` |
+| Branch | `main` |
+| Root Directory | 비워 둠 |
+| Language | `Python 3` |
+| Build Command | `pip install -r requirements.txt` |
+| Start Command | `uvicorn main:app --host 0.0.0.0 --port $PORT` |
+| Health Check Path | `/api/health` |
+| Auto-Deploy | `On Commit` |
+
+Render의 기본 Python 버전 변경으로 빌드 결과가 달라지지 않도록 저장소 루트의 `.python-version`에서 Python 3.12 계열을 사용합니다.
+
+Render에서는 로컬 `.env`가 배포되지 않습니다. 기존 `data-editing-system`과 같은 Oracle Cloud 시스템 DB를 사용한다면 Render의 Environment Group을 연결하거나 해당 서비스의 환경변수를 이 서비스에도 별도로 등록합니다. 최소한 `DB_MODE=cloud`, `DB_USER_CLD`, `DB_PASSWORD_CLD`, `DB_DSN_CLD`가 필요하며 TNS 별칭을 사용할 때는 Wallet 파일을 Render Secret Files로 등록하고 `DB_WALLET_PATH=/etc/secrets`를 설정합니다. 운영 HTTPS에서는 `INIT_COOKIE_SECURE=Y`를 사용합니다. 비밀번호, Wallet 비밀번호, 관리자 키를 Git 또는 `render.yaml`에 저장하지 않습니다.
+
+이후 아래 배포 매크로로 `main`에 push하면 Render가 자동으로 새 빌드를 시작합니다.
+
+```powershell
+powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\git-publish-main.ps1
+```
+
 ## 최초 관리자 가입
 
 시스템 테이블이 아직 없는 새 DB에서는 최초 관리자만 초기화를 승인할 수 있습니다.
