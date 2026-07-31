@@ -5,6 +5,7 @@
 ## 작업 원칙
 
 - 작업 전 `git status --short`로 변경 범위를 확인하고 사용자의 기존 변경사항을 되돌리지 않습니다.
+- 사용자가 현재 요청에서 명시적으로 승인하지 않은 `git add`, `git commit`, `git push`와 `scripts/git-publish-main.ps1` 실행을 금지합니다. 일반 소스 수정은 VS Code Source Control과 Explorer에 변경 이력이 남도록 미커밋 상태로 유지합니다.
 - 요청 범위 밖의 파일을 대량 정리하거나 이름을 바꾸지 않습니다.
 - 새 문서와 코드는 UTF-8로 작성합니다.
 - 파일 검색은 `rg` 또는 `rg --files`를 우선 사용합니다.

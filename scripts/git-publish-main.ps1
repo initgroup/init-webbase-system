@@ -5,10 +5,11 @@ configured remote branch, and pushes.
 
 .DESCRIPTION
 Default commit message format:
-<repository-folder> - yyyy.MM.dd-N
+<repository-folder>-yyyyMMdd-N
 
 The sequence number is calculated as the largest existing commit number for
-the current date plus one.
+the current date plus one. Running this script immediately stages, commits,
+rebases, and pushes without an additional confirmation prompt.
 
 .EXAMPLE
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\git-publish-main.ps1
@@ -78,7 +79,7 @@ function Get-NextCommitMessage {
 
     $escapedPrefix = [regex]::Escape($Prefix)
     $escapedDate = [regex]::Escape($DateText)
-    $pattern = "^$escapedPrefix - $escapedDate-(\d+)$"
+    $pattern = "^$escapedPrefix-$escapedDate-(\d+)$"
     $commitCount = & git rev-list --all --count
     if ($LASTEXITCODE -ne 0) {
         throw "Unable to count Git commits."
@@ -86,7 +87,7 @@ function Get-NextCommitMessage {
 
     $subjects = @()
     if ([int]$commitCount -gt 0) {
-        $subjects = & git log --all --format=%s --grep="$Prefix - $DateText-"
+        $subjects = & git log --all --format=%s --grep="$Prefix-$DateText-"
         if ($LASTEXITCODE -ne 0) {
             throw "Unable to read git log for commit sequence."
         }
@@ -103,7 +104,7 @@ function Get-NextCommitMessage {
         }
     }
 
-    return "$Prefix - $DateText-$($maxSeq + 1)"
+    return "$Prefix-$DateText-$($maxSeq + 1)"
 }
 
 if (-not (Test-Path -LiteralPath (Join-Path $repoRoot ".git"))) {
@@ -147,7 +148,7 @@ if (-not $staged) {
     exit 0
 }
 
-$dateText = Get-Date -Format "yyyy.MM.dd"
+$dateText = Get-Date -Format "yyyyMMdd"
 $commitMessage = Get-NextCommitMessage -Prefix $MessagePrefix -DateText $dateText
 
 Write-Host ""

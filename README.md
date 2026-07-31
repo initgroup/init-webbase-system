@@ -138,8 +138,8 @@ VS Code의 `Terminal: Run Task`에서 다음 작업을 바로 실행할 수 있�
 - `INIT Web Base: Validate Source`: Python, JavaScript, SQL ID, PowerShell, VS Code 설정 검증
 - `INIT Web Base: Backup Source`: `Working` 또는 `Git` 백업 방식 선택
 - `INIT Web Base: Backup Working Source`: 미커밋 변경을 포함하되 비밀 파일과 생성물을 제외하고 백업
-- `INIT Web Base: Backup Git Source`: 현재 `HEAD`의 추적 소스만 백업
-- `INIT Web Base: Publish Main`: 변경 전체를 커밋하고 `main`을 rebase한 뒤 원격 저장소로 push
+- `INIT Web Base: Backup Git Source`: 현재 `HEAD`의 추적 소스와 전체 Git 이력 bundle 백업
+- `INIT Web Base: Publish Main (Explicit Commit + Push)`: 사용자가 배포를 명시적으로 요청했을 때만 변경 전체를 커밋하고 `main`을 rebase한 뒤 원격 저장소로 push
 
 동일한 작업은 터미널에서도 실행할 수 있습니다.
 
@@ -150,6 +150,15 @@ VS Code의 `Terminal: Run Task`에서 다음 작업을 바로 실행할 수 있�
 .\scripts\git-publish-main.ps1
 ```
 
+백업은 다른 프로젝트의 백업 폴더를 건드리지 않고 다음 프로젝트 전용 경로에 생성됩니다.
+
+- Working 백업: `D:\work\backup\init-webbase-system_WORKING_BACKUP\<yyyyMMdd-HHmmss>`
+- Git 백업: `D:\work\backup\init-webbase-system_GIT_BACKUP\<yyyyMMdd-HHmmss>`
+
+`Working` 백업은 현재 미커밋 변경과 신규 파일을 포함하고 `.git`, `venv`, `.env`, 비밀 파일, 지갑, Instant Client와 생성 캐시는 제외합니다. `Git` 백업에는 현재 `HEAD`의 파일과 전체 브랜치·태그 이력을 복원할 수 있는 `repository.bundle`이 함께 저장됩니다.
+
+이 작업공간은 VS Code Explorer의 Git 변경 배지·색상, Source Control 변경 건수와 파일 Timeline의 Local History를 사용합니다. 커밋하지 않은 수정 파일은 Explorer에 `M`, 신규 파일은 `U`로 표시되며, 워킹트리가 clean이면 표시가 없는 것이 정상입니다.
+
 처음 한 번만 로컬 저장소와 GitHub 원격 저장소를 연결합니다.
 
 ```powershell
@@ -157,7 +166,7 @@ git init -b main
 git remote add origin https://github.com/initgroup/init-webbase-system.git
 ```
 
-`git-publish-main.ps1`은 `git add -A`, 커밋, `pull --rebase`, `push`를 실제 수행합니다. 비어 있는 새 GitHub 저장소에는 최초 `main` 브랜치를 만들고 upstream을 자동 설정하며, 이후 실행부터는 원격 `main`을 fetch/rebase한 뒤 push합니다. 실행 전에 변경 파일과 원격 저장소를 확인합니다. `.git` 메타데이터가 없는 소스 묶음에서는 `Git` 백업과 Git 배포가 안전하게 중단됩니다.
+`git-publish-main.ps1`을 터미널이나 VS Code 배포 작업에서 실행하면 추가 확인 없이 `git add -A`, 커밋, `pull --rebase`, `push`를 수행합니다. 커밋 메시지는 저장소 폴더명을 시스템명으로 사용해 `init-webbase-system-20260731-1`처럼 `시스템명-현재날짜-순번` 형식으로 자동 생성되며, 같은 날짜의 후속 커밋은 순번이 증가합니다. 따라서 실행 전에 `git status --short`로 포함될 변경 파일을 확인해야 합니다. Codex는 사용자가 현재 요청에서 커밋 또는 배포를 명시적으로 승인하지 않으면 이 스크립트를 실행하지 않고 변경을 워킹트리에 남깁니다. 비어 있는 새 GitHub 저장소에는 최초 `main` 브랜치를 만들고 upstream을 자동 설정하며, 이후 실행부터는 원격 `main`을 fetch/rebase한 뒤 push합니다. `.git` 메타데이터가 없는 소스 묶음에서는 `Git` 백업과 Git 배포가 안전하게 중단됩니다.
 
 JavaScript 검증에는 Node.js가 있을 때 `node --check`를 사용합니다. Node.js가 없어도 웹 애플리케이션 실행에는 영향이 없으며 검증 매크로는 해당 단계만 건너뜁니다.
 

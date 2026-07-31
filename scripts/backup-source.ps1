@@ -1,6 +1,6 @@
 param(
     [ValidateSet("Git", "Working")]
-    [string]$Mode = "Git",
+    [string]$Mode = "Working",
 
     [string]$BackupRoot = ""
 )
@@ -28,7 +28,14 @@ if ($backupRootFull.Equals($repoRootFull, $pathComparison) -or
 }
 
 $stamp = Get-Date -Format "yyyyMMdd-HHmmss"
-$backupDir = Join-Path $backupRootFull "$safeProjectName-$($Mode.ToLower())-$stamp"
+$modeFolderName = if ($Mode -eq "Git") {
+    "${safeProjectName}_GIT_BACKUP"
+}
+else {
+    "${safeProjectName}_WORKING_BACKUP"
+}
+$modeRoot = Join-Path $backupRootFull $modeFolderName
+$backupDir = Join-Path $modeRoot $stamp
 
 if ($Mode -eq "Git") {
     if (-not (Test-Path -LiteralPath (Join-Path $repoRoot ".git"))) {
@@ -57,6 +64,12 @@ if ($Mode -eq "Git") {
             throw "git archive failed with exit code $LASTEXITCODE"
         }
         Expand-Archive -LiteralPath $zipPath -DestinationPath $backupDir -Force
+
+        $bundlePath = Join-Path $backupDir "repository.bundle"
+        git bundle create "$bundlePath" --branches --tags
+        if ($LASTEXITCODE -ne 0) {
+            throw "git bundle failed with exit code $LASTEXITCODE"
+        }
     }
     finally {
         Pop-Location
@@ -85,6 +98,7 @@ else {
         ".pytest_cache",
         ".mypy_cache",
         ".ruff_cache",
+        "artifacts",
         "backup"
     )
     $excludeFiles = @(
@@ -106,9 +120,17 @@ else {
     $robocopyArgs = @(
         $repoRoot,
         $backupDir,
-        "/MIR",
+        "/E",
+        "/COPY:DAT",
+        "/DCOPY:DAT",
+        "/XJ",
         "/R:2",
         "/W:1",
+        "/NFL",
+        "/NDL",
+        "/NJH",
+        "/NJS",
+        "/NP",
         "/XD"
     ) + $excludeDirs + @("/XF") + $excludeFiles
 
@@ -124,8 +146,47 @@ else {
     }
 }
 
+$branch = "N/A"
+$headCommit = "N/A"
+if (Test-Path -LiteralPath (Join-Path $repoRoot ".git")) {
+    $branch = (& git -C $repoRoot branch --show-current).Trim()
+    if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($branch)) {
+        $branch = "DETACHED"
+    }
+    $headCommit = (& git -C $repoRoot rev-parse HEAD).Trim()
+    if ($LASTEXITCODE -ne 0) {
+        $headCommit = "UNKNOWN"
+    }
+}
+
+$manifest = @(
+    "Project: $safeProjectName"
+    "Mode: $Mode"
+    "Created: $(Get-Date -Format 'yyyy-MM-dd HH:mm:ss K')"
+    "Source: $repoRootFull"
+    "Branch: $branch"
+    "HEAD: $headCommit"
+)
+
+if ($Mode -eq "Git") {
+    $manifest += "Git history: repository.bundle"
+    $manifest += "Restore example: git clone repository.bundle restored-project"
+}
+else {
+    $manifest += "Includes: committed, modified, and untracked working files"
+    $manifest += "Excludes: Git metadata, environments, dependencies, secrets, wallets, and generated caches"
+}
+
+$utf8NoBom = [System.Text.UTF8Encoding]::new($false)
+[System.IO.File]::WriteAllLines(
+    (Join-Path $backupDir "BACKUP_INFO.txt"),
+    $manifest,
+    $utf8NoBom
+)
+
 Write-Host ""
 Write-Host "Backup completed." -ForegroundColor Green
 Write-Host "Project: $safeProjectName"
 Write-Host "Mode: $Mode"
+Write-Host "Backup group: $modeRoot"
 Write-Host "Path: $backupDir"

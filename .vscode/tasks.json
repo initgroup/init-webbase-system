@@ -121,7 +121,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Publish Main",
+            "label": "INIT Web Base: Publish Main (Explicit Commit + Push)",
             "type": "shell",
             "command": "powershell",
             "args": [
