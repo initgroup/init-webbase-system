@@ -8,19 +8,17 @@
         return root?.querySelector(selector) || null;
     }
 
-    function applySkinContent() {
-        const currentSkin = App.getSitePreferences().homepageSkin;
-        const template = App.getHomepageSkinTemplates().find((item) => item.code === currentSkin);
-        if (!template) return;
+    function applyLoginHeroContent() {
+        const content = window.LOGIN_HERO || {};
 
-        query("#loginHeroEyebrow").textContent = template.eyebrow;
-        query("#loginHeroDescription").textContent = template.heroDescription;
-        query("#loginSignalLabel").textContent = template.signalLabel;
+        query("#loginHeroEyebrow").textContent = content.eyebrow || "";
+        query("#loginHeroDescription").textContent = content.heroDescription || "";
+        query("#loginSignalLabel").textContent = content.signalLabel || "";
 
         const title = query("#loginTitle");
         if (title) {
             title.replaceChildren();
-            (template.titleLines || []).forEach((line) => {
+            (content.titleLines || []).forEach((line) => {
                 title.appendChild(Common.dom.element("span", {
                     className: "login-title-line",
                     text: line
@@ -151,7 +149,7 @@
             root = context.root;
             controller = new AbortController();
             query("#loginAppName").textContent = window.APP_NAME || "웹 사이트";
-            applySkinContent();
+            applyLoginHeroContent();
 
             query("#loginForm")?.addEventListener("submit", submitLogin, { signal: controller.signal });
             query("#signupForm")?.addEventListener("submit", submitSignup, { signal: controller.signal });
@@ -169,9 +167,6 @@
                 dialog.addEventListener("click", (event) => {
                     if (event.target === dialog) closeDialog(dialog);
                 }, { signal: controller.signal });
-            });
-            window.addEventListener("app:homepage-skin-change", applySkinContent, {
-                signal: controller.signal
             });
             syncAdminKeyField();
         },

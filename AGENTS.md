@@ -33,7 +33,6 @@
 | `account` | `backend/routers/account.py` | `/api/account` |
 | `admin-users` | `backend/routers/admin_users.py` | `/api/admin/users` |
 | `admin-notices` | `backend/routers/admin_notices.py` | `/api/admin/notices` |
-| `admin-site-settings` | `backend/routers/site_settings.py` | `/api/admin/site-settings` |
 
 ## 인증·인가 필수 기준
 

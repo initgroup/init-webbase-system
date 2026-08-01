@@ -21,25 +21,14 @@ from backend.auth_context import (
 )
 from backend.database import close_db_pool
 from backend.rate_limit import check_auth_rate_limit
-from backend.routers import account, admin_notices, admin_users, auth, home, site_settings
+from backend.routers import account, admin_notices, admin_users, auth, home
 
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
 logger = logging.getLogger(__name__)
 BASE_DIR = Path(__file__).resolve().parent
 FRONTEND_DIR = BASE_DIR / "frontend"
-PUBLIC_SITE_FILE = FRONTEND_DIR / "public" / "index.html"
 PORTAL_SITE_FILE = FRONTEND_DIR / "index.html"
-PUBLIC_SITE_PATHS = {
-    "/",
-    "/company",
-    "/business",
-    "/solutions",
-    "/projects",
-    "/insights",
-    "/careers",
-    "/contact",
-}
 
 
 @asynccontextmanager
@@ -136,7 +125,6 @@ ALLOWED_ORIGINS = _allowed_origins()
 PUBLIC_API_ROUTES = {
     ("GET", "/api/health"),
     ("GET", "/api/auth/admin-contact"),
-    ("GET", "/api/site/preferences"),
     ("POST", "/api/auth/signup"),
     ("POST", "/api/auth/login"),
     ("POST", "/api/auth/logout"),
@@ -237,8 +225,7 @@ async def add_cache_headers(request, call_next):
     path = request.url.path
     if (
         path.startswith("/api/")
-        or path in PUBLIC_SITE_PATHS
-        or path in {"/app", "/index.html"}
+        or path in {"/", "/app", "/index.html"}
         or path.startswith(("/js/", "/css/", "/pages/", "/config/"))
         or path.endswith((".html", ".js", ".css"))
     ):
@@ -261,20 +248,12 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(home.router, prefix="/api/home", tags=["home"])
 app.include_router(account.router, prefix="/api/account", tags=["account"])
-app.include_router(site_settings.public_router, prefix="/api/site", tags=["site"])
 app.include_router(admin_users.router, prefix="/api/admin/users", tags=["admin-users"])
 app.include_router(
     admin_notices.router,
     prefix="/api/admin/notices",
     tags=["admin-notices"],
 )
-app.include_router(
-    site_settings.admin_router,
-    prefix="/api/admin/site-settings",
-    tags=["admin-site-settings"],
-)
-
-
 @app.get("/api/health")
 def health():
     return {
@@ -282,18 +261,6 @@ def health():
         "message": "API server is running.",
         "appName": os.getenv("APP_NAME", "INIT Data Intelligence"),
     }
-
-
-@app.get("/", include_in_schema=False)
-@app.get("/company", include_in_schema=False)
-@app.get("/business", include_in_schema=False)
-@app.get("/solutions", include_in_schema=False)
-@app.get("/projects", include_in_schema=False)
-@app.get("/insights", include_in_schema=False)
-@app.get("/careers", include_in_schema=False)
-@app.get("/contact", include_in_schema=False)
-def public_site():
-    return FileResponse(PUBLIC_SITE_FILE)
 
 
 @app.get("/app", include_in_schema=False)
@@ -305,31 +272,6 @@ def authenticated_portal():
 @app.get("/index.html", include_in_schema=False)
 def redirect_to_authenticated_portal():
     return RedirectResponse(url="/app", status_code=308)
-
-
-@app.get("/html/About.html", include_in_schema=False)
-def redirect_legacy_about():
-    return RedirectResponse(url="/company", status_code=308)
-
-
-@app.get("/html/Service.html", include_in_schema=False)
-def redirect_legacy_service():
-    return RedirectResponse(url="/business", status_code=308)
-
-
-@app.get("/html/Solution.html", include_in_schema=False)
-def redirect_legacy_solution():
-    return RedirectResponse(url="/solutions", status_code=308)
-
-
-@app.get("/html/Recruit.html", include_in_schema=False)
-def redirect_legacy_recruit():
-    return RedirectResponse(url="/careers", status_code=308)
-
-
-@app.get("/html/BrandIdentity.html", include_in_schema=False)
-def redirect_legacy_brand_identity():
-    return RedirectResponse(url="/company", status_code=308)
 
 
 app.mount("/", StaticFiles(directory=str(FRONTEND_DIR), html=True), name="frontend")

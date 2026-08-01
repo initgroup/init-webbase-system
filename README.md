@@ -1,8 +1,8 @@
 # INIT Web Base
 
-FastAPI, Oracle 시스템 DB, 정적 HTML/CSS/JavaScript로 구성한 인아이티 기업 홈페이지와 인증 업무 포털의 공통 기반입니다. 공개 사이트는 AI 기반 데이터·국가통계 전문성을 소개하고, 업무 포털은 로그인 세션, 계정, 사용자, 공지사항과 시스템 설정을 제공합니다.
+FastAPI, Oracle 시스템 DB, 정적 HTML/CSS/JavaScript로 구성한 인아이티 인증 업무 포털의 공통 개발 기반입니다. 로그인 세션, 계정, 사용자, 공지사항과 AI 학습 현황 기능을 제공합니다.
 
-프론트엔드는 빌드 과정 없이 `frontend/`의 정적 파일을 그대로 서비스합니다. 공개 사이트와 인증 포털은 서로 분리되어 있고 Node.js나 npm 설치는 필요하지 않습니다.
+프론트엔드는 빌드 과정 없이 `frontend/`의 정적 파일을 그대로 서비스하며 Node.js나 npm 설치는 필요하지 않습니다. 기업 홈페이지는 별도 `init-homepage` 프로젝트에서 관리합니다.
 
 ## 제공 범위
 
@@ -12,13 +12,9 @@ FastAPI, Oracle 시스템 DB, 정적 HTML/CSS/JavaScript로 구성한 인아이�
 - 내 계정 정보, 이름, 이메일, 비밀번호 관리
 - 관리자 사용자 관리
 - 공지사항과 첨부 파일 관리
-- 관리자 홈페이지 스킨 설정
 - AI 학습 트렌드와 사용자·콘텐츠 통계 대시보드
-- History API와 semantic URL을 사용하는 공개 홈페이지 SPA
 - hash route와 페이지 수명주기를 사용하는 인증 업무 SPA
 - `database/*.sql`의 SQL ID를 이용한 정적 SQL 분리
-
-공개 홈페이지에는 `INIT Data Editing System`의 도움말을 바탕으로 검증한 제품 소개가 포함되어 있지만, 실제 데이터 편집·분석 실행 기능은 이 기본 프로젝트에 복제하지 않습니다.
 
 ## 프로젝트 구조
 
@@ -36,15 +32,10 @@ FastAPI, Oracle 시스템 DB, 정적 HTML/CSS/JavaScript로 구성한 인아이�
 │     ├─ home.py
 │     ├─ account.py
 │     ├─ admin_users.py
-│     ├─ admin_notices.py
-│     └─ site_settings.py
+│     └─ admin_notices.py
 ├─ database/                      # SQL ID별 정적 SQL
 ├─ frontend/
-│  ├─ index.html                  # 인증 업무 SPA 셸 (/app)
-│  ├─ public/
-│  │  ├─ index.html              # 기업 홈페이지 SPA 셸 (/)
-│  │  ├─ css/public-site.css
-│  │  └─ js/public-site.js
+│  ├─ index.html                  # 인증 업무 SPA 셸 (/)
 │  ├─ config/app.config.js        # 프론트 표시 이름과 공통 UI 설정
 │  ├─ config/menu.config.js       # 메뉴와 페이지 리소스 등록
 │  ├─ pages/{page-name}.html
@@ -124,8 +115,7 @@ Copy-Item .env.example .env
 powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-server.ps1
 ```
 
-- 기업 홈페이지: `http://127.0.0.1:8100`
-- 로그인·업무 포털: `http://127.0.0.1:8100/app#/login`
+- 로그인·업무 포털: `http://127.0.0.1:8100/#/login`
 - API 문서: `http://127.0.0.1:8100/docs`
 - 상태 확인: `http://127.0.0.1:8100/api/health`
 
@@ -220,11 +210,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\git-publish-main.p
 | `account` | `/api/account` | 로그인 사용자 본인 |
 | `admin-users` | `/api/admin/users` | 관리자 |
 | `admin-notices` | `/api/admin/notices` | 관리자 |
-| `admin-site-settings` | `/api/admin/site-settings` | 관리자 |
 
 관리자 메뉴를 화면에서 숨기는 것은 보조 UI일 뿐 보안 경계가 아닙니다. 관리자 API는 서버 세션의 역할을 다시 검증해야 합니다.
-
-관리자는 `시스템 설정`에서 `National Intelligence`, `Data Spectrum`, `Public Insight` 홈페이지 스킨을 미리보고 저장할 수 있습니다. 선택값은 `INIT$_TB_SYSTEM_SETTING`에 저장되고 공개 홈페이지, 로그인, 업무 홈과 사이드바에 함께 적용됩니다. 기존 DB에 이 기능을 추가할 때는 백업과 스키마 비교 후 `database/INIT_SYSTEM_ALT.sql`을 실행합니다.
 
 홈 대시보드는 사용자 증가, 최근 세션 활동, 게시 콘텐츠 구성을 실제 시스템 DB 데이터로 집계합니다. AI 학습 트렌드는 `INIT$_TB_AI_TRAINING_RUN`에 외부 학습 파이프라인이 기록한 실행 이력을 사용하며, 웹 애플리케이션은 해당 테이블에 임의 학습 결과를 생성하거나 수정하는 API를 노출하지 않습니다. 학습 이력이 없으면 차트에만 `샘플 미리보기`가 표시되고 KPI와 인사이트는 실제 집계값을 유지합니다.
 
