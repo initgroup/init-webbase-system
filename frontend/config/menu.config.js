@@ -34,12 +34,20 @@ window.MENU_CONFIG = [
                 title: "공지사항 관리",
                 icon: "□",
                 roles: ["ADMIN"]
+            },
+            {
+                type: "page",
+                page: "admin-site-settings",
+                label: "디자인 설정",
+                title: "포털 디자인 설정",
+                icon: "✦",
+                roles: ["ADMIN"]
             }
         ]
     }
 ];
 
 window.PAGE_FILE_CONFIG = {
-    htmlPages: ["login", "home", "account", "admin-users", "admin-notices"],
-    scriptPages: ["login", "home", "account", "admin-users", "admin-notices"]
+    htmlPages: ["login", "home", "account", "admin-users", "admin-notices", "admin-site-settings"],
+    scriptPages: ["login", "home", "account", "admin-users", "admin-notices", "admin-site-settings"]
 };

@@ -6,7 +6,10 @@
     const state = {
         user: null,
         sessionChecked: false,
-        handlingUnauthorized: false
+        handlingUnauthorized: false,
+        sitePreferences: {
+            homepageSkin: window.DEFAULT_HOMEPAGE_SKIN || "national-intelligence"
+        }
     };
 
     const pageMap = new Map();
@@ -49,6 +52,41 @@
         } catch (_error) {
             // Visited state is cosmetic and must not block navigation.
         }
+    }
+
+    function homepageSkinTemplates() {
+        return Array.isArray(window.APP_SKIN_TEMPLATES) ? window.APP_SKIN_TEMPLATES : [];
+    }
+
+    function normalizeHomepageSkin(value) {
+        const requested = String(value || "").trim().toLowerCase();
+        const fallback = String(window.DEFAULT_HOMEPAGE_SKIN || "national-intelligence");
+        return homepageSkinTemplates().some((template) => template.code === requested) ? requested : fallback;
+    }
+
+    function applyHomepageSkin(value) {
+        const homepageSkin = normalizeHomepageSkin(value);
+        state.sitePreferences.homepageSkin = homepageSkin;
+        document.documentElement.dataset.homeSkin = homepageSkin;
+        window.dispatchEvent(new CustomEvent("app:homepage-skin-change", {
+            detail: { homepageSkin }
+        }));
+        return homepageSkin;
+    }
+
+    async function loadSitePreferences() {
+        try {
+            const payload = await Common.api.request("/site/preferences", {
+                method: "GET",
+                showLoading: false
+            });
+            const data = Common.data.get(payload) || {};
+            applyHomepageSkin(data.homepageSkin);
+        } catch (error) {
+            console.warn("[App] 포털 디자인 설정을 불러오지 못해 기본 스킨을 사용합니다.", error);
+            applyHomepageSkin(state.sitePreferences.homepageSkin);
+        }
+        return { ...state.sitePreferences };
     }
 
     function roleCode() {
@@ -454,6 +492,17 @@
         getUser() {
             return state.user ? { ...state.user } : null;
         },
+        getSitePreferences() {
+            return { ...state.sitePreferences };
+        },
+        getHomepageSkinTemplates() {
+            return homepageSkinTemplates().map((template) => ({
+                ...template,
+                titleLines: [...(template.titleLines || [])],
+                colors: [...(template.colors || [])]
+            }));
+        },
+        applyHomepageSkin,
         setSessionUser(user) {
             state.user = Common.data.normalizeUser(user);
             renderNavigation();
@@ -514,6 +563,7 @@
         if (brandName) brandName.textContent = appName;
         bindShellEvents();
 
+        await loadSitePreferences();
         await refreshSession({ silent: true });
         const requested = routeFromHash();
         const initialPage = state.user

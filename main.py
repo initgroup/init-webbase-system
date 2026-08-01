@@ -21,7 +21,7 @@ from backend.auth_context import (
 )
 from backend.database import close_db_pool
 from backend.rate_limit import check_auth_rate_limit
-from backend.routers import account, admin_notices, admin_users, auth, home
+from backend.routers import account, admin_notices, admin_users, auth, home, site_settings
 
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
@@ -125,6 +125,7 @@ ALLOWED_ORIGINS = _allowed_origins()
 PUBLIC_API_ROUTES = {
     ("GET", "/api/health"),
     ("GET", "/api/auth/admin-contact"),
+    ("GET", "/api/site/preferences"),
     ("POST", "/api/auth/signup"),
     ("POST", "/api/auth/login"),
     ("POST", "/api/auth/logout"),
@@ -248,12 +249,20 @@ app.add_middleware(
 app.include_router(auth.router, prefix="/api/auth", tags=["auth"])
 app.include_router(home.router, prefix="/api/home", tags=["home"])
 app.include_router(account.router, prefix="/api/account", tags=["account"])
+app.include_router(site_settings.public_router, prefix="/api/site", tags=["site"])
 app.include_router(admin_users.router, prefix="/api/admin/users", tags=["admin-users"])
 app.include_router(
     admin_notices.router,
     prefix="/api/admin/notices",
     tags=["admin-notices"],
 )
+app.include_router(
+    site_settings.admin_router,
+    prefix="/api/admin/site-settings",
+    tags=["admin-site-settings"],
+)
+
+
 @app.get("/api/health")
 def health():
     return {

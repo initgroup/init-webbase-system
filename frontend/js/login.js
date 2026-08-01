@@ -8,8 +8,9 @@
         return root?.querySelector(selector) || null;
     }
 
-    function applyLoginHeroContent() {
-        const content = window.LOGIN_HERO || {};
+    function applySkinContent() {
+        const currentSkin = App.getSitePreferences().homepageSkin;
+        const content = App.getHomepageSkinTemplates().find((item) => item.code === currentSkin) || {};
 
         query("#loginHeroEyebrow").textContent = content.eyebrow || "";
         query("#loginHeroDescription").textContent = content.heroDescription || "";
@@ -149,7 +150,7 @@
             root = context.root;
             controller = new AbortController();
             query("#loginAppName").textContent = window.APP_NAME || "웹 사이트";
-            applyLoginHeroContent();
+            applySkinContent();
 
             query("#loginForm")?.addEventListener("submit", submitLogin, { signal: controller.signal });
             query("#signupForm")?.addEventListener("submit", submitSignup, { signal: controller.signal });
@@ -167,6 +168,9 @@
                 dialog.addEventListener("click", (event) => {
                     if (event.target === dialog) closeDialog(dialog);
                 }, { signal: controller.signal });
+            });
+            window.addEventListener("app:homepage-skin-change", applySkinContent, {
+                signal: controller.signal
             });
             syncAdminKeyField();
         },
