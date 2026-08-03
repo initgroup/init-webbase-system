@@ -138,6 +138,12 @@ AUTH_RATE_LIMIT_ROUTES = {
 
 UNSAFE_API_METHODS = {"POST", "PUT", "PATCH", "DELETE"}
 
+PASSWORD_CHANGE_ALLOWED_API_ROUTES = {
+    ("GET", "/api/auth/session"),
+    ("POST", "/api/auth/logout"),
+    ("PUT", "/api/account/password"),
+}
+
 SENSITIVE_DIRECT_PATH_PREFIXES = (
     "/.env",
     "/backend",
@@ -204,11 +210,19 @@ async def enforce_api_authentication(request, call_next):
         and method != "OPTIONS"
     ):
         try:
-            await run_in_threadpool(authenticate_request, request)
+            session_user = await run_in_threadpool(authenticate_request, request)
             session_authenticated = True
+            if (
+                str(session_user.get("passwordChangeYn") or "N").strip().upper() != "Y"
+                and (method, path) not in PASSWORD_CHANGE_ALLOWED_API_ROUTES
+            ):
+                return JSONResponse(
+                    status_code=403,
+                    content={"detail": "초기 비밀번호를 먼저 변경해 주세요."},
+                )
         except Exception as exc:
             status_code = int(getattr(exc, "status_code", 401))
-            detail = getattr(exc, "detail", "Login session is required.")
+            detail = getattr(exc, "detail", "로그인 세션이 필요합니다.")
             return JSONResponse(status_code=status_code, content={"detail": detail})
 
     response = await call_next(request)

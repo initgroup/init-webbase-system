@@ -57,14 +57,14 @@
                 <p>인아이티 직원으로 승인된 계정만 안전하게 접속할 수 있습니다.</p>
             </header>
 
-            <form id="loginForm" class="login-form">
+            <form id="loginForm" class="login-form" autocomplete="off">
                 <label class="field">
                     <span class="required">로그인 ID</span>
                     <input id="loginId" class="input" type="text" required maxlength="100" autocomplete="username" data-page-focus>
                 </label>
                 <label class="field">
                     <span class="required">비밀번호</span>
-                    <input id="loginPassword" class="input" type="password" maxlength="1024" required autocomplete="current-password">
+                    <input id="loginPassword" class="input" type="password" maxlength="1024" required autocomplete="new-password" readonly>
                 </label>
                 <p id="loginStatus" class="inline-status" aria-live="polite"></p>
                 <button id="loginSubmitButton" class="button button-primary" type="submit">로그인</button>
@@ -90,6 +90,39 @@
             <p class="login-security-note"><span aria-hidden="true">●</span> 직원전용 시스템은 서버 세션으로 안전하게 보호됩니다.</p>
         </section>
     </div>
+
+    <dialog id="requiredPasswordChangeDialog" class="dialog" aria-labelledby="requiredPasswordChangeTitle" aria-describedby="requiredPasswordChangeDescription">
+        <header class="dialog-header">
+            <div>
+                <h2 id="requiredPasswordChangeTitle">초기 비밀번호 변경</h2>
+                <p id="requiredPasswordChangeDescription">관리자가 전달한 임시 비밀번호로 로그인했습니다. 계속하려면 새 비밀번호로 변경해야 합니다.</p>
+            </div>
+        </header>
+        <form id="requiredPasswordChangeForm">
+            <div class="dialog-body">
+                <div class="form-grid">
+                    <label class="field field-span">
+                        <span class="required">현재 임시 비밀번호</span>
+                        <input id="requiredCurrentPassword" class="input" type="password" maxlength="1024" required autocomplete="current-password">
+                    </label>
+                    <label class="field">
+                        <span class="required">새 비밀번호</span>
+                        <input id="requiredNewPassword" class="input" type="password" minlength="8" maxlength="1024" required autocomplete="new-password">
+                    </label>
+                    <label class="field">
+                        <span class="required">새 비밀번호 확인</span>
+                        <input id="requiredNewPasswordConfirm" class="input" type="password" minlength="8" maxlength="1024" required autocomplete="new-password">
+                    </label>
+                </div>
+                <p class="field-help">새 비밀번호는 8자 이상이어야 하며 현재 임시 비밀번호와 달라야 합니다.</p>
+                <p id="requiredPasswordChangeStatus" class="inline-status" aria-live="polite"></p>
+            </div>
+            <footer class="dialog-footer">
+                <button id="requiredPasswordLogoutButton" class="button button-secondary" type="button">로그아웃</button>
+                <button id="requiredPasswordChangeButton" class="button button-primary" type="submit">비밀번호 변경</button>
+            </footer>
+        </form>
+    </dialog>
 
     <dialog id="signupDialog" class="dialog" aria-labelledby="signupDialogTitle">
         <form id="signupForm">

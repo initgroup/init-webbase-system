@@ -43,6 +43,7 @@ _REQUIRED_CORE_COLUMNS = {
             "USE_YN",
             "CREATED_AT",
             "UPDATED_AT",
+            "PASSWORD_CHANGE_YN",
         }
     ),
     "INIT$_TB_AUTH_SESSION": frozenset(
@@ -91,9 +92,9 @@ _REQUIRED_CORE_COLUMNS = {
 }
 _USER_TABLE = "INIT$_TB_USER"
 _INCOMPLETE_SCHEMA_DETAIL = (
-    "Core database schema is incomplete. "
-    "For a new database run database/INIT_SYSTEM_DDL.sql; "
-    "for an existing database run database/INIT_SYSTEM_ALT.sql as the system database owner."
+    "시스템 데이터베이스 구성이 완료되지 않았습니다. "
+    "신규 데이터베이스는 database/INIT_SYSTEM_DDL.sql을 실행하고, "
+    "기존 데이터베이스는 시스템 DB 소유자 계정으로 database/INIT_SYSTEM_ALT.sql을 실행해 주세요."
 )
 _DUMMY_PASSWORD_HASH = hash_password("")
 
@@ -160,6 +161,7 @@ def _public_user(row) -> dict:
         "userName": row[2],
         "email": row[3],
         "roleCode": row[6] or "USER",
+        "passwordChangeYn": str(row[7] or "N").strip().upper(),
     }
 
 
@@ -169,28 +171,28 @@ def _validate_signup(payload: SignupRequest) -> tuple[str, str, str, str]:
     email = payload.email.strip().lower()
     requested_role = payload.roleCode.strip().upper()
     if not login_id:
-        raise HTTPException(status_code=400, detail="Login ID is required.")
+        raise HTTPException(status_code=400, detail="로그인 ID를 입력해 주세요.")
     if len(login_id) > 100:
-        raise HTTPException(status_code=400, detail="Login ID must be 100 characters or less.")
+        raise HTTPException(status_code=400, detail="로그인 ID는 100자 이하로 입력해 주세요.")
     if not user_name:
-        raise HTTPException(status_code=400, detail="User name is required.")
+        raise HTTPException(status_code=400, detail="이름을 입력해 주세요.")
     if len(user_name) > 200:
-        raise HTTPException(status_code=400, detail="User name must be 200 characters or less.")
+        raise HTTPException(status_code=400, detail="이름은 200자 이하로 입력해 주세요.")
     if not _EMAIL_PATTERN.fullmatch(email):
-        raise HTTPException(status_code=400, detail="A valid email address is required.")
+        raise HTTPException(status_code=400, detail="올바른 이메일 주소를 입력해 주세요.")
     if len(payload.password) < 8:
-        raise HTTPException(status_code=400, detail="Password must be at least 8 characters.")
+        raise HTTPException(status_code=400, detail="비밀번호는 8자 이상 입력해 주세요.")
     if requested_role not in {"USER", "ADMIN"}:
-        raise HTTPException(status_code=400, detail="roleCode must be USER or ADMIN.")
+        raise HTTPException(status_code=400, detail="권한 코드는 USER 또는 ADMIN이어야 합니다.")
     return login_id, user_name, email, requested_role
 
 
 def _require_first_admin_key(provided_key: str) -> None:
     configured_key = str(os.getenv("INIT_ADMIN_KEY") or "")
     if not configured_key:
-        raise HTTPException(status_code=503, detail="First administrator signup is not configured.")
+        raise HTTPException(status_code=503, detail="최초 관리자 가입 설정이 완료되지 않았습니다.")
     if not hmac.compare_digest(str(provided_key or ""), configured_key):
-        raise HTTPException(status_code=403, detail="Administrator signup key is invalid.")
+        raise HTTPException(status_code=403, detail="관리자 가입 키가 올바르지 않습니다.")
 
 
 @router.get("/admin-contact")
@@ -198,7 +200,7 @@ def get_admin_contact():
     return {
         "status": "success",
         "data": {
-            "name": os.getenv("INIT_ADMIN_CONTACT_NAME", "System administrator"),
+            "name": os.getenv("INIT_ADMIN_CONTACT_NAME", "시스템 관리자"),
             "email": os.getenv("INIT_ADMIN_CONTACT_EMAIL", ""),
             "phone": os.getenv("INIT_ADMIN_CONTACT_PHONE", ""),
         },
@@ -234,7 +236,7 @@ def signup(payload: SignupRequest):
             if requested_role != "ADMIN":
                 raise HTTPException(
                     status_code=409,
-                    detail="The first account must be an administrator.",
+                    detail="최초 계정은 관리자 권한으로 가입해야 합니다.",
                 )
             _require_first_admin_key(payload.adminKey)
             if not _schema_is_complete(table_names, columns_by_table):
@@ -262,7 +264,7 @@ def signup(payload: SignupRequest):
             if requested_role != "ADMIN":
                 raise HTTPException(
                     status_code=409,
-                    detail="The first account must be an administrator.",
+                    detail="최초 계정은 관리자 권한으로 가입해야 합니다.",
                 )
             _require_first_admin_key(payload.adminKey)
             role_code = "ADMIN"
@@ -271,7 +273,7 @@ def signup(payload: SignupRequest):
             if requested_role != "USER":
                 raise HTTPException(
                     status_code=409,
-                    detail="Administrator signup is only available during first-time initialization.",
+                    detail="관리자 가입은 최초 시스템 초기화 단계에서만 가능합니다.",
                 )
             role_code = "USER"
             use_yn = "N"
@@ -281,7 +283,7 @@ def signup(payload: SignupRequest):
             {"loginId": login_id, "email": email},
         )
         if int(cursor.fetchone()[0] or 0) > 0:
-            raise HTTPException(status_code=409, detail="Login ID or email is already registered.")
+            raise HTTPException(status_code=409, detail="이미 등록된 로그인 ID 또는 이메일입니다.")
 
         cursor.execute(
             SqlLoader.get_sql("AUTH_SIGNUP_INSERT_USER"),
@@ -298,9 +300,9 @@ def signup(payload: SignupRequest):
         return {
             "status": "success",
             "message": (
-                "First administrator account created."
+                "최초 관리자 계정을 생성했습니다."
                 if first_user
-                else "Signup request submitted for administrator approval."
+                else "가입 신청을 완료했습니다. 관리자 승인 후 로그인할 수 있습니다."
             ),
             "data": {
                 "loginId": login_id,
@@ -316,7 +318,7 @@ def signup(payload: SignupRequest):
         if conn:
             conn.rollback()
         logger.exception("Signup failed.")
-        raise HTTPException(status_code=500, detail="Signup could not be completed.") from exc
+        raise HTTPException(status_code=500, detail="가입 처리 중 오류가 발생했습니다.") from exc
     finally:
         if cursor:
             cursor.close()
@@ -328,7 +330,7 @@ def signup(payload: SignupRequest):
 def login(payload: LoginRequest, request: Request, response: Response):
     login_id = payload.loginId.strip()
     if not login_id or not payload.password:
-        raise HTTPException(status_code=400, detail="Login ID and password are required.")
+        raise HTTPException(status_code=400, detail="로그인 ID와 비밀번호를 입력해 주세요.")
 
     conn = None
     cursor = None
@@ -343,28 +345,28 @@ def login(payload: LoginRequest, request: Request, response: Response):
                 raise HTTPException(status_code=503, detail=_INCOMPLETE_SCHEMA_DETAIL)
             raise HTTPException(
                 status_code=503,
-                detail="System initialization requires first administrator signup.",
+                detail="시스템 초기화를 위해 최초 관리자 가입이 필요합니다.",
             )
         if user_count == 0:
             raise HTTPException(
                 status_code=503,
-                detail="System initialization requires first administrator signup.",
+                detail="시스템 초기화를 위해 최초 관리자 가입이 필요합니다.",
             )
         cursor.execute(SqlLoader.get_sql("AUTH_LOGIN_USER"), {"loginId": login_id})
         row = cursor.fetchone()
         stored_password_hash = row[4] if row else _DUMMY_PASSWORD_HASH
         password_is_valid = verify_password(payload.password, stored_password_hash or "")
         if not row or not password_is_valid:
-            raise HTTPException(status_code=401, detail="Invalid login ID or password.")
+            raise HTTPException(status_code=401, detail="로그인 ID 또는 비밀번호가 올바르지 않습니다.")
         if row[5] != "Y":
-            raise HTTPException(status_code=403, detail="Signup approval is pending.")
+            raise HTTPException(status_code=403, detail="관리자 승인이 완료되지 않은 계정입니다.")
 
         token = create_login_session(conn, int(row[0]))
         conn.commit()
         set_session_cookie(response, token, request)
         return {
             "status": "success",
-            "message": "Login succeeded.",
+            "message": "로그인되었습니다.",
             "sessionTtlSeconds": get_session_ttl_seconds(),
             "user": _public_user(row),
         }
@@ -376,7 +378,7 @@ def login(payload: LoginRequest, request: Request, response: Response):
         if conn:
             conn.rollback()
         logger.exception("Login failed.")
-        raise HTTPException(status_code=500, detail="Login could not be completed.") from exc
+        raise HTTPException(status_code=500, detail="로그인 처리 중 오류가 발생했습니다.") from exc
     finally:
         if cursor:
             cursor.close()
@@ -387,7 +389,7 @@ def login(payload: LoginRequest, request: Request, response: Response):
 @router.post("/logout")
 def logout(request: Request, response: Response):
     revoke_current_session(request, response)
-    return {"status": "success", "message": "Logged out."}
+    return {"status": "success", "message": "로그아웃되었습니다."}
 
 
 @router.get("/session")

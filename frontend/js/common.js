@@ -3,6 +3,8 @@
 
     const API_PREFIX = "/api";
     let loadingCount = 0;
+    const messageDialogQueue = [];
+    let activeMessageDialog = null;
 
     class ApiError extends Error {
         constructor(message, status = 0, payload = null) {
@@ -159,7 +161,10 @@
             userName: String(pick(row, "userName", "USER_NAME", "name", "NAME") || ""),
             email: String(pick(row, "email", "EMAIL", "userEmail", "USER_EMAIL") || ""),
             roleCode: String(pick(row, "roleCode", "ROLE_CODE", "role", "ROLE") || "USER").toUpperCase(),
-            useYn: String(pick(row, "useYn", "USE_YN") || "Y").toUpperCase()
+            useYn: String(pick(row, "useYn", "USE_YN") || "Y").toUpperCase(),
+            passwordChangeYn: String(
+                pick(row, "passwordChangeYn", "PASSWORD_CHANGE_YN") || "N"
+            ).toUpperCase()
         };
 
         if (!user.userId && !user.loginId && !user.userName) return null;
@@ -254,6 +259,75 @@
         element.className = `inline-status${type ? ` is-${type}` : ""}`;
     }
 
+    function openNextMessageDialog() {
+        if (activeMessageDialog || messageDialogQueue.length === 0) return;
+        const dialog = document.getElementById("commonMessageDialog");
+        if (!dialog) {
+            const pending = messageDialogQueue.shift();
+            pending.resolve(pending.mode === "confirm" ? false : undefined);
+            openNextMessageDialog();
+            return;
+        }
+
+        activeMessageDialog = messageDialogQueue.shift();
+        const isConfirm = activeMessageDialog.mode === "confirm";
+        const title = document.getElementById("commonMessageDialogTitle");
+        const text = document.getElementById("commonMessageDialogText");
+        const icon = document.getElementById("commonMessageDialogIcon");
+        const cancelButton = document.getElementById("commonMessageDialogCancel");
+        const confirmButton = document.getElementById("commonMessageDialogConfirm");
+
+        if (title) title.textContent = activeMessageDialog.options.title || (isConfirm ? "작업 확인" : "알림");
+        if (text) text.textContent = activeMessageDialog.message;
+        if (icon) icon.textContent = activeMessageDialog.options.icon || (isConfirm ? "?" : "i");
+        if (cancelButton) {
+            cancelButton.hidden = !isConfirm;
+            cancelButton.textContent = activeMessageDialog.options.cancelText || "취소";
+        }
+        if (confirmButton) {
+            confirmButton.textContent = activeMessageDialog.options.confirmText || "확인";
+            confirmButton.className = `button ${activeMessageDialog.options.danger ? "button-danger" : "button-primary"}`;
+        }
+
+        dialog.returnValue = "cancel";
+        dialog.showModal();
+        window.setTimeout(() => confirmButton?.focus(), 0);
+    }
+
+    function completeMessageDialog() {
+        if (!activeMessageDialog) return;
+        const dialog = document.getElementById("commonMessageDialog");
+        const pending = activeMessageDialog;
+        activeMessageDialog = null;
+        pending.resolve(pending.mode === "confirm" ? dialog?.returnValue === "confirm" : undefined);
+        openNextMessageDialog();
+    }
+
+    function showMessageDialog(message, mode, options = {}) {
+        return new Promise((resolve) => {
+            messageDialogQueue.push({
+                message: String(message ?? ""),
+                mode,
+                options,
+                resolve
+            });
+            openNextMessageDialog();
+        });
+    }
+
+    function confirmMessage(message, options = {}) {
+        return showMessageDialog(message, "confirm", options);
+    }
+
+    function alertMessage(message, options = {}) {
+        return showMessageDialog(message, "alert", options);
+    }
+
+    document.getElementById("commonMessageDialog")?.addEventListener("close", completeMessageDialog);
+    document.getElementById("commonMessageDialog")?.addEventListener("cancel", (event) => {
+        event.currentTarget.returnValue = "cancel";
+    });
+
     function clear(element) {
         if (element) element.replaceChildren();
     }
@@ -336,7 +410,8 @@
             hideLoading,
             toast,
             setInlineStatus,
-            confirm: (message) => Promise.resolve(window.confirm(message))
+            alert: alertMessage,
+            confirm: confirmMessage
         },
         format: {
             error: formatError,

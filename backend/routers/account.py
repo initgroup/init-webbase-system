@@ -52,6 +52,7 @@ def _user_payload(row) -> dict[str, Any]:
         "useYn": row[5],
         "createdAt": _serialize(row[6]),
         "updatedAt": _serialize(row[7]),
+        "passwordChangeYn": str(row[8] or "N").strip().upper(),
     }
 
 
@@ -59,7 +60,7 @@ def _load_user(cursor, user_id: int):
     cursor.execute(SqlLoader.get_sql("ACCOUNT_USER_DETAIL"), {"userId": user_id})
     row = cursor.fetchone()
     if not row:
-        raise HTTPException(status_code=404, detail="Login user was not found.")
+        raise HTTPException(status_code=404, detail="로그인 사용자를 찾을 수 없습니다.")
     return row
 
 
@@ -85,11 +86,11 @@ def update_profile(payload: ProfileUpdateRequest, request: Request):
     user_name = payload.userName.strip()
     email = payload.email.strip().lower()
     if not user_name:
-        raise HTTPException(status_code=400, detail="User name is required.")
+        raise HTTPException(status_code=400, detail="이름을 입력해 주세요.")
     if len(user_name) > 200:
-        raise HTTPException(status_code=400, detail="User name must be 200 characters or less.")
+        raise HTTPException(status_code=400, detail="이름은 200자 이하로 입력해 주세요.")
     if not _EMAIL_PATTERN.fullmatch(email):
-        raise HTTPException(status_code=400, detail="A valid email address is required.")
+        raise HTTPException(status_code=400, detail="올바른 이메일 주소를 입력해 주세요.")
 
     conn = None
     cursor = None
@@ -101,13 +102,13 @@ def update_profile(payload: ProfileUpdateRequest, request: Request):
             {"email": email, "userId": user_id},
         )
         if int(cursor.fetchone()[0] or 0) > 0:
-            raise HTTPException(status_code=409, detail="Email is already used by another user.")
+            raise HTTPException(status_code=409, detail="이미 다른 사용자가 사용 중인 이메일입니다.")
         cursor.execute(
             SqlLoader.get_sql("ACCOUNT_PROFILE_UPDATE"),
             {"userName": user_name, "email": email, "userId": user_id},
         )
         if cursor.rowcount <= 0:
-            raise HTTPException(status_code=404, detail="Active login user was not found.")
+            raise HTTPException(status_code=404, detail="사용 중인 로그인 계정을 찾을 수 없습니다.")
         user = _user_payload(_load_user(cursor, user_id))
         conn.commit()
         return {"status": "success", "data": user}
@@ -119,7 +120,7 @@ def update_profile(payload: ProfileUpdateRequest, request: Request):
         if conn:
             conn.rollback()
         logger.exception("Account profile update failed.")
-        raise HTTPException(status_code=500, detail="Account profile could not be updated.") from exc
+        raise HTTPException(status_code=500, detail="계정 정보를 변경하지 못했습니다.") from exc
     finally:
         if cursor:
             cursor.close()
@@ -134,11 +135,11 @@ def update_password(payload: PasswordUpdateRequest, request: Request):
     current_password = payload.currentPassword
     new_password = payload.newPassword
     if not current_password:
-        raise HTTPException(status_code=400, detail="Current password is required.")
+        raise HTTPException(status_code=400, detail="현재 비밀번호를 입력해 주세요.")
     if len(new_password) < 8:
-        raise HTTPException(status_code=400, detail="New password must be at least 8 characters.")
+        raise HTTPException(status_code=400, detail="새 비밀번호는 8자 이상 입력해 주세요.")
     if current_password == new_password:
-        raise HTTPException(status_code=400, detail="New password must be different from the current password.")
+        raise HTTPException(status_code=400, detail="새 비밀번호는 현재 비밀번호와 다르게 입력해 주세요.")
 
     conn = None
     cursor = None
@@ -148,9 +149,9 @@ def update_password(payload: PasswordUpdateRequest, request: Request):
         cursor.execute(SqlLoader.get_sql("ACCOUNT_PASSWORD_HASH"), {"userId": user_id})
         row = cursor.fetchone()
         if not row:
-            raise HTTPException(status_code=404, detail="Active login user was not found.")
+            raise HTTPException(status_code=404, detail="사용 중인 로그인 계정을 찾을 수 없습니다.")
         if not verify_password(current_password, row[0] or ""):
-            raise HTTPException(status_code=400, detail="Current password is not correct.")
+            raise HTTPException(status_code=400, detail="현재 비밀번호가 올바르지 않습니다.")
         cursor.execute(
             SqlLoader.get_sql("ACCOUNT_PASSWORD_UPDATE"),
             {"passwordHash": hash_password(new_password), "userId": user_id},
@@ -163,7 +164,7 @@ def update_password(payload: PasswordUpdateRequest, request: Request):
             },
         )
         conn.commit()
-        return {"status": "success", "message": "Password changed."}
+        return {"status": "success", "message": "비밀번호를 변경했습니다."}
     except HTTPException:
         if conn:
             conn.rollback()
@@ -172,7 +173,7 @@ def update_password(payload: PasswordUpdateRequest, request: Request):
         if conn:
             conn.rollback()
         logger.exception("Account password update failed.")
-        raise HTTPException(status_code=500, detail="Password could not be updated.") from exc
+        raise HTTPException(status_code=500, detail="비밀번호를 변경하지 못했습니다.") from exc
     finally:
         if cursor:
             cursor.close()

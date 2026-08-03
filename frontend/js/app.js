@@ -93,6 +93,10 @@
         return String(state.user?.roleCode || "USER").toUpperCase();
     }
 
+    function requiresPasswordChange() {
+        return Boolean(state.user) && String(state.user.passwordChangeYn || "N").toUpperCase() !== "Y";
+    }
+
     function isAllowed(item) {
         const roles = Array.isArray(item?.roles) ? item.roles.map((value) => String(value).toUpperCase()) : [];
         return roles.length === 0 || roles.includes(roleCode());
@@ -207,7 +211,7 @@
         const navigation = document.getElementById("appNavigation");
         if (!navigation) return;
         navigation.replaceChildren();
-        if (!state.user) return;
+        if (!state.user || requiresPasswordChange()) return;
 
         (window.MENU_CONFIG || []).forEach((item) => {
             if (item.type === "page") {
@@ -346,6 +350,9 @@
             let page = getPage(pageCode);
 
             if (!state.user && pageCode !== "login") {
+                pageCode = "login";
+                page = getPage(pageCode);
+            } else if (requiresPasswordChange()) {
                 pageCode = "login";
                 page = getPage(pageCode);
             } else if (state.user && pageCode === "login") {
@@ -512,6 +519,7 @@
         isAdmin() {
             return roleCode() === "ADMIN";
         },
+        requiresPasswordChange,
         touchSessionFromResponse() {
             // Authentication state is owned by the HttpOnly server session cookie.
         },
@@ -566,7 +574,7 @@
         await loadSitePreferences();
         await refreshSession({ silent: true });
         const requested = routeFromHash();
-        const initialPage = state.user
+        const initialPage = state.user && !requiresPasswordChange()
             ? (requested && requested !== "login" ? requested : "home")
             : "login";
 

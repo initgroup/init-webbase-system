@@ -80,6 +80,25 @@
         </div>
     </div>
 
+    <dialog id="commonMessageDialog" class="dialog common-message-dialog" aria-labelledby="commonMessageDialogTitle" aria-describedby="commonMessageDialogText">
+        <form method="dialog">
+            <header class="dialog-header common-message-dialog-header">
+                <span id="commonMessageDialogIcon" class="common-message-dialog-icon" aria-hidden="true">?</span>
+                <div>
+                    <h2 id="commonMessageDialogTitle">확인</h2>
+                    <p>요청한 작업을 진행할지 확인해 주세요.</p>
+                </div>
+            </header>
+            <div class="dialog-body">
+                <p id="commonMessageDialogText" class="common-message-dialog-text"></p>
+            </div>
+            <footer class="dialog-footer">
+                <button id="commonMessageDialogCancel" class="button button-secondary" type="submit" value="cancel">취소</button>
+                <button id="commonMessageDialogConfirm" class="button button-primary" type="submit" value="confirm">확인</button>
+            </footer>
+        </form>
+    </dialog>
+
     <section id="toastRegion" class="toast-region" aria-label="알림" aria-live="polite" aria-atomic="false"></section>
 
     <noscript>이 사이트를 사용하려면 JavaScript를 활성화해 주세요.</noscript>

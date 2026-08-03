@@ -2,7 +2,10 @@
     <header class="page-header">
         <div>
             <h2 id="adminUsersTitle">사용자 관리</h2>
-            <p>가입 사용자의 권한과 사용 여부를 관리합니다. 모든 변경은 서버 권한 검사를 통과해야 합니다.</p>
+            <p>사용자 계정과 권한, 사용 여부를 관리합니다. 모든 변경은 서버 권한 검사를 통과해야 합니다.</p>
+        </div>
+        <div class="page-actions">
+            <button id="openCreateUserButton" class="button button-primary" type="button">사용자 추가</button>
         </div>
     </header>
 
@@ -32,15 +35,26 @@
         </form>
 
         <p id="userListStatus" class="inline-status" aria-live="polite"></p>
+        <aside class="password-reset-policy" aria-labelledby="passwordResetPolicyTitle">
+            <strong id="passwordResetPolicyTitle">비밀번호 초기화 규칙</strong>
+            <ul>
+                <li>관리자는 기존 비밀번호를 조회하거나 직접 지정할 수 없으며 임시 비밀번호 초기화만 할 수 있습니다.</li>
+                <li>임시 비밀번호는 16자리이며 영문 대문자·소문자·숫자·특수문자(<code>!@#$%*-_</code>)를 각각 포함합니다.</li>
+                <li>초기화 즉시 해당 사용자의 기존 로그인 세션이 모두 종료되며, 임시 비밀번호는 결과 창에 한 번만 표시됩니다.</li>
+                <li>본인 계정과 마지막 활성 관리자는 삭제할 수 없으며, 업무 이력이 연결된 사용자는 비활성화해야 합니다.</li>
+            </ul>
+        </aside>
         <div class="table-wrap">
-            <table class="data-table">
+            <table class="data-table admin-user-table">
                 <thead>
                     <tr>
+                        <th scope="col">USER_ID</th>
                         <th scope="col">로그인 ID</th>
                         <th scope="col">이름</th>
                         <th scope="col">이메일</th>
                         <th scope="col">권한</th>
                         <th scope="col">사용</th>
+                        <th scope="col">초기 비밀번호 변경</th>
                         <th scope="col">관리</th>
                     </tr>
                 </thead>
@@ -50,19 +64,78 @@
         <div id="userCardList" class="user-card-list" aria-label="모바일 사용자 목록"></div>
     </section>
 
+    <dialog id="createUserDialog" class="dialog" aria-labelledby="createUserDialogTitle">
+        <header class="dialog-header">
+            <div>
+                <h3 id="createUserDialogTitle">사용자 추가</h3>
+                <p>비밀번호는 서버에서 임시 비밀번호로 생성되며 저장 후 한 번만 표시됩니다.</p>
+            </div>
+            <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>
+        </header>
+        <form id="createUserForm">
+            <div class="dialog-body">
+                <div class="form-grid">
+                    <label class="field">
+                        <span>로그인 ID</span>
+                        <input id="createUserLoginId" class="input" type="text" maxlength="100" required autocomplete="off">
+                    </label>
+                    <label class="field">
+                        <span>이름</span>
+                        <input id="createUserName" class="input" type="text" maxlength="200" required autocomplete="off">
+                    </label>
+                    <label class="field field-span">
+                        <span>이메일</span>
+                        <input id="createUserEmail" class="input" type="email" maxlength="300" required autocomplete="off">
+                    </label>
+                    <label class="field">
+                        <span>권한</span>
+                        <select id="createUserRoleCode" class="select">
+                            <option value="USER" selected>사용자</option>
+                            <option value="ADMIN">관리자</option>
+                        </select>
+                    </label>
+                    <label class="field">
+                        <span>사용 여부</span>
+                        <select id="createUserUseYn" class="select">
+                            <option value="Y" selected>사용</option>
+                            <option value="N">중지</option>
+                        </select>
+                    </label>
+                </div>
+                <p id="createUserStatus" class="inline-status" aria-live="polite"></p>
+            </div>
+            <footer class="dialog-footer">
+                <button class="button button-secondary" type="button" data-dialog-close>취소</button>
+                <button id="createUserSubmitButton" class="button button-primary" type="submit">추가</button>
+            </footer>
+        </form>
+    </dialog>
+
     <dialog id="temporaryPasswordDialog" class="dialog" aria-labelledby="temporaryPasswordDialogTitle">
         <header class="dialog-header">
             <div>
                 <h3 id="temporaryPasswordDialogTitle">임시 비밀번호</h3>
-                <p>이 값은 지금 한 번만 표시될 수 있습니다. 안전한 방법으로 사용자에게 전달해 주세요.</p>
+                <p>16자리 임시 비밀번호입니다. 이 값은 지금 한 번만 표시되므로 안전한 방법으로 사용자에게 전달해 주세요.</p>
             </div>
             <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>
         </header>
         <div class="dialog-body">
+            <dl class="temporary-access-details">
+                <div>
+                    <dt>접속 주소</dt>
+                    <dd id="temporarySiteUrl"></dd>
+                </div>
+                <div>
+                    <dt>로그인 ID</dt>
+                    <dd id="temporaryLoginId"></dd>
+                </div>
+            </dl>
             <p id="temporaryPasswordValue" class="secret-result"></p>
+            <p class="field-help">회사 이메일 또는 사내 메신저의 본인 확인된 1:1 대화로 전달하세요.</p>
         </div>
         <footer class="dialog-footer">
             <button id="copyTemporaryPasswordButton" class="button button-secondary" type="button">복사</button>
+            <button id="copyTemporaryAccessGuideButton" class="button button-secondary" type="button">접속 안내문 복사</button>
             <button class="button button-primary" type="button" data-dialog-close>확인</button>
         </footer>
     </dialog>

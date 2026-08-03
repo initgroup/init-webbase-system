@@ -1513,10 +1513,66 @@ body.auth-screen .page-host {
     background: #f8fbff;
 }
 
-.data-table .select {
+.password-reset-policy {
+    margin: 0 0 14px;
+    padding: 14px 16px;
+    border: 1px solid #bae6fd;
+    border-radius: var(--radius-md);
+    color: #164e63;
+    background: #f0f9ff;
+}
+
+.password-reset-policy strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #0c4a6e;
+}
+
+.password-reset-policy ul {
+    display: grid;
+    margin: 0;
+    padding-left: 20px;
+    gap: 4px;
+    font-size: 0.82rem;
+    line-height: 1.55;
+}
+
+.password-reset-policy code {
+    color: inherit;
+}
+
+.data-table .select,
+.data-table .user-admin-input {
     min-width: 100px;
     min-height: 44px;
     padding: 6px 9px;
+}
+
+.admin-user-table {
+    min-width: 1440px;
+}
+
+.admin-user-table .user-admin-input {
+    width: 150px;
+}
+
+.admin-user-table td:nth-child(1) .user-admin-input {
+    width: 90px;
+}
+
+.admin-user-table td:nth-child(3) .user-admin-input {
+    width: 170px;
+}
+
+.admin-user-table td:nth-child(4) .user-admin-input {
+    width: 230px;
+}
+
+.user-admin-input.is-readonly,
+.user-admin-input:disabled {
+    color: var(--color-muted);
+    background: #f1f5f9;
+    cursor: not-allowed;
 }
 
 .table-actions {
@@ -1611,14 +1667,15 @@ body.auth-screen .page-host {
     min-width: 0;
 }
 
-.user-card-field .select {
+.user-card-field .select,
+.user-card-field .input {
     width: 100%;
     min-height: 44px;
 }
 
 .user-card-actions {
     display: grid;
-    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.3fr) minmax(0, 0.8fr);
     gap: 8px;
 }
 
@@ -2254,6 +2311,35 @@ body.auth-screen .page-host {
     cursor: pointer;
 }
 
+.common-message-dialog {
+    width: min(460px, calc(100% - 28px));
+}
+
+.common-message-dialog-header {
+    display: grid;
+    grid-template-columns: 42px minmax(0, 1fr);
+    align-items: center;
+}
+
+.common-message-dialog-icon {
+    display: grid;
+    width: 42px;
+    height: 42px;
+    place-items: center;
+    border-radius: 50%;
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+    font-size: 1.15rem;
+    font-weight: 800;
+}
+
+.common-message-dialog-text {
+    margin: 0;
+    line-height: 1.65;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
 .secret-result {
     padding: 14px;
     border: 1px solid #bfdbfe;
@@ -2261,6 +2347,28 @@ body.auth-screen .page-host {
     color: #1e3a8a;
     background: var(--color-primary-soft);
     font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
+    overflow-wrap: anywhere;
+}
+
+.temporary-access-details {
+    display: grid;
+    margin: 0 0 14px;
+    gap: 8px;
+}
+
+.temporary-access-details div {
+    display: grid;
+    grid-template-columns: 90px minmax(0, 1fr);
+    gap: 12px;
+}
+
+.temporary-access-details dt {
+    color: var(--color-muted);
+}
+
+.temporary-access-details dd {
+    margin: 0;
+    font-weight: 700;
     overflow-wrap: anywhere;
 }
 

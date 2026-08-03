@@ -121,6 +121,33 @@ DECLARE
     END;
 BEGIN
     /*
+     * 2026-08 최초 비밀번호 변경 의무화
+     *
+     * 기존 사용자는 이미 정상 비밀번호를 사용 중인 것으로 보정하기 위해
+     * 최초 ADD 시 Y를 채우고, 이후 신규 기본값은 N으로 변경합니다.
+     */
+    ADD_COLUMN_IF_MISSING(
+        'INIT$_TB_USER'
+      , 'PASSWORD_CHANGE_YN'
+      , 'CHAR(1 BYTE) DEFAULT ''Y'' NOT NULL ENABLE'
+    );
+    RUN_DDL(
+        'ALTER TABLE "INIT$_TB_USER" MODIFY ('
+     || '"PASSWORD_CHANGE_YN" DEFAULT ''N'')'
+      , 'MODIFY INIT$_TB_USER.PASSWORD_CHANGE_YN DEFAULT'
+    );
+    ADD_CONSTRAINT_IF_MISSING(
+        'INIT$_CK_USER_PASSWORD_CHANGE'
+      , 'ALTER TABLE "INIT$_TB_USER" '
+     || 'ADD CONSTRAINT "INIT$_CK_USER_PASSWORD_CHANGE" '
+     || 'CHECK ("PASSWORD_CHANGE_YN" IN (''Y'', ''N'')) ENABLE'
+    );
+    RUN_DDL(
+        q'[COMMENT ON COLUMN "INIT$_TB_USER"."PASSWORD_CHANGE_YN" IS 'Initial password changed (Y/N)']'
+      , 'COMMENT INIT$_TB_USER.PASSWORD_CHANGE_YN'
+    );
+
+    /*
      * 2026-08 포털 디자인 스킨 설정
      *
      * 아래 컬럼 선언과 ADD 호출 순서는 INIT_SYSTEM_DDL.sql의

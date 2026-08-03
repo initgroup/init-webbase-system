@@ -76,7 +76,7 @@ def _get_session_token(request: Request) -> str:
 def get_current_session_token_hash(request: Request) -> str:
     token = _get_session_token(request)
     if not token:
-        raise HTTPException(status_code=401, detail="Login session is required.")
+        raise HTTPException(status_code=401, detail="로그인 세션이 필요합니다.")
     return _hash_session_token(token)
 
 
@@ -165,6 +165,7 @@ def _row_to_user(row) -> dict[str, Any]:
         "userName": row[2],
         "email": row[3],
         "roleCode": str(row[4] or "USER").strip().upper(),
+        "passwordChangeYn": str(row[5] or "N").strip().upper(),
     }
 
 
@@ -175,7 +176,7 @@ def authenticate_request(request: Request, *, touch: bool = True) -> dict[str, A
 
     token = _get_session_token(request)
     if not token:
-        raise HTTPException(status_code=401, detail="Login session is required.")
+        raise HTTPException(status_code=401, detail="로그인 세션이 필요합니다.")
 
     conn = None
     cursor = None
@@ -191,7 +192,7 @@ def authenticate_request(request: Request, *, touch: bool = True) -> dict[str, A
         )
         row = cursor.fetchone()
         if not row:
-            raise HTTPException(status_code=401, detail="Login session is invalid or expired.")
+            raise HTTPException(status_code=401, detail="로그인 세션이 만료되었거나 유효하지 않습니다.")
         user = _row_to_user(row)
         if touch:
             cursor.execute(
@@ -209,7 +210,10 @@ def authenticate_request(request: Request, *, touch: bool = True) -> dict[str, A
         raise
     except Exception as exc:
         logger.exception("Login session verification failed.")
-        raise HTTPException(status_code=503, detail="Login session could not be verified.") from exc
+        raise HTTPException(
+            status_code=503,
+            detail="로그인 세션을 확인할 수 없습니다. 잠시 후 다시 시도해 주세요.",
+        ) from exc
     finally:
         if cursor:
             cursor.close()
@@ -235,4 +239,4 @@ def get_request_role_code(request: Request) -> str:
 
 def require_admin_role(request: Request) -> None:
     if get_request_role_code(request) != "ADMIN":
-        raise HTTPException(status_code=403, detail="Administrator permission is required.")
+        raise HTTPException(status_code=403, detail="관리자 권한이 필요합니다.")

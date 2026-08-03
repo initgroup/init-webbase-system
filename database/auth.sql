@@ -45,6 +45,7 @@ INSERT INTO "INIT$_TB_USER" (
   , PASSWORD_HASH
   , ROLE_CODE
   , USE_YN
+  , PASSWORD_CHANGE_YN
   , CREATED_AT
 ) VALUES (
     :loginId
@@ -53,6 +54,7 @@ INSERT INTO "INIT$_TB_USER" (
   , :passwordHash
   , :roleCode
   , :useYn
+  , 'Y'
   , SYSTIMESTAMP
 )
 ;
@@ -65,6 +67,7 @@ SELECT USER_ID
      , PASSWORD_HASH
      , USE_YN
      , ROLE_CODE
+     , PASSWORD_CHANGE_YN
   FROM "INIT$_TB_USER"
  WHERE LOGIN_ID = :loginId
 ;
@@ -91,6 +94,7 @@ SELECT U.USER_ID
      , U.USER_NAME
      , U.EMAIL
      , U.ROLE_CODE
+     , U.PASSWORD_CHANGE_YN
   FROM "INIT$_TB_AUTH_SESSION" S
   JOIN "INIT$_TB_USER" U
     ON U.USER_ID = S.USER_ID

@@ -237,7 +237,10 @@
 
     async function deleteNotice() {
         const id = query("#noticeId").value;
-        if (!id || !(await Common.ui.confirm("선택한 공지사항을 삭제하시겠습니까?"))) return;
+        if (!id || !(await Common.ui.confirm(
+            "선택한 공지사항을 삭제하시겠습니까?",
+            { title: "공지사항 삭제", confirmText: "삭제", danger: true }
+        ))) return;
         try {
             await Common.api.request(`/admin/notices/${encodeURIComponent(id)}`, {
                 method: "DELETE",
@@ -328,7 +331,10 @@
     }
 
     async function deleteAttachment(fileId, fileName) {
-        if (!fileId || !(await Common.ui.confirm(`"${fileName}" 파일을 삭제하시겠습니까?`))) return;
+        if (!fileId || !(await Common.ui.confirm(
+            `"${fileName}" 파일을 삭제하시겠습니까?`,
+            { title: "첨부 파일 삭제", confirmText: "삭제", danger: true }
+        ))) return;
         try {
             await Common.api.request(`/admin/notices/attachments/${encodeURIComponent(fileId)}`, {
                 method: "DELETE",
