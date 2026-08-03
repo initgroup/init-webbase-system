@@ -7,6 +7,9 @@ configured remote branch, and pushes.
 Default commit message format:
 <repository-folder>-yyyyMMdd-N
 
+The configured remote URL must match the expected repository URL before any
+changes are staged or pushed.
+
 The sequence number is calculated as the largest existing commit number for
 the current date plus one. Running this script immediately stages, commits,
 rebases, and pushes without an additional confirmation prompt.
@@ -18,7 +21,8 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\git-publish-main.p
 param(
     [string]$Remote = "origin",
     [string]$Branch = "main",
-    [string]$MessagePrefix = ""
+    [string]$MessagePrefix = "",
+    [string]$RepositoryUrl = "https://github.com/initgroup/initgroup-members.git"
 )
 
 $ErrorActionPreference = "Stop"
@@ -111,9 +115,15 @@ if (-not (Test-Path -LiteralPath (Join-Path $repoRoot ".git"))) {
     throw "Git metadata was not found: $repoRoot"
 }
 
-$remoteUrl = & git remote get-url $Remote
-if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace(($remoteUrl | Out-String).Trim())) {
+$remoteUrl = (& git remote get-url $Remote | Out-String).Trim()
+if ($LASTEXITCODE -ne 0 -or [string]::IsNullOrWhiteSpace($remoteUrl)) {
     throw "Git remote '$Remote' is not configured. Add it before publishing."
+}
+
+$normalizedRemoteUrl = $remoteUrl.TrimEnd('/')
+$normalizedRepositoryUrl = $RepositoryUrl.Trim().TrimEnd('/')
+if (-not $normalizedRemoteUrl.Equals($normalizedRepositoryUrl, [System.StringComparison]::OrdinalIgnoreCase)) {
+    throw "Git remote '$Remote' points to '$remoteUrl'. Expected '$RepositoryUrl'."
 }
 
 $currentBranch = (& git branch --show-current).Trim()

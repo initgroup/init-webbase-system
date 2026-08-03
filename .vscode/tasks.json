@@ -2,7 +2,7 @@
     "version": "2.0.0",
     "tasks": [
         {
-            "label": "INIT Web Base: Setup Venv",
+            "label": "INIT Members: Setup Venv",
             "type": "shell",
             "command": "powershell",
             "args": [
@@ -23,7 +23,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Run Server",
+            "label": "INIT Members: Run Server",
             "type": "shell",
             "command": "powershell",
             "args": [
@@ -51,7 +51,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Validate Source",
+            "label": "INIT Members: Validate Source",
             "type": "shell",
             "command": "powershell",
             "args": [
@@ -67,7 +67,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Backup Source",
+            "label": "INIT Members: Backup Source",
             "type": "shell",
             "command": "powershell",
             "args": [
@@ -85,7 +85,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Backup Git Source",
+            "label": "INIT Members: Backup Git Source",
             "type": "shell",
             "command": "powershell",
             "args": [
@@ -103,7 +103,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Backup Working Source",
+            "label": "INIT Members: Backup Working Source",
             "type": "shell",
             "command": "powershell",
             "args": [
@@ -121,7 +121,7 @@
             "problemMatcher": []
         },
         {
-            "label": "INIT Web Base: Publish Main (Explicit Commit + Push)",
+            "label": "INIT Members: Publish Main (Explicit Commit + Push)",
             "type": "shell",
             "command": "powershell",
             "args": [

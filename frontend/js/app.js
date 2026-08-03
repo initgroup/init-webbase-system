@@ -16,7 +16,7 @@
     const loadedScripts = new Map();
     const registeredHtmlPages = new Set(window.PAGE_FILE_CONFIG?.htmlPages || []);
     const registeredScriptPages = new Set(window.PAGE_FILE_CONFIG?.scriptPages || []);
-    const VISITED_PAGES_STORAGE_KEY = "init-webbase:visited-pages";
+    const VISITED_PAGES_STORAGE_KEY = "init-members:visited-pages";
 
     function collectPages(items = []) {
         items.forEach((item) => {

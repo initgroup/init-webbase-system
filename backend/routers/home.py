@@ -147,7 +147,7 @@ def dashboard(request: Request):
         return {
             "status": "success",
             "data": {
-                "appName": os.getenv("APP_NAME", "INIT Data Intelligence"),
+                "appName": os.getenv("APP_NAME", "INIT Members"),
                 "user": user,
                 "userCount": int(count_row[0] or 0),
                 "activeUserCount": int(count_row[1] or 0),

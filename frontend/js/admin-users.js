@@ -27,9 +27,98 @@
         return Common.dom.element("td", { text: text ?? "" });
     }
 
+    function roleSelectFor(role, accessibleName) {
+        const select = Common.dom.element("select", {
+            className: "select",
+            attrs: { "aria-label": `${accessibleName} 권한` }
+        });
+        select.append(
+            option("USER", "사용자", role === "USER"),
+            option("ADMIN", "관리자", role === "ADMIN")
+        );
+        return select;
+    }
+
+    function useSelectFor(useYn, accessibleName) {
+        const select = Common.dom.element("select", {
+            className: "select",
+            attrs: { "aria-label": `${accessibleName} 사용 여부` }
+        });
+        select.append(
+            option("Y", "사용", useYn === "Y"),
+            option("N", "중지", useYn === "N")
+        );
+        return select;
+    }
+
+    function actionButtons(id, roleSelect, useSelect, className = "table-actions") {
+        const actions = Common.dom.element("div", { className });
+        const saveButton = Common.dom.element("button", {
+            className: "button button-secondary",
+            text: "저장",
+            type: "button"
+        });
+        const resetButton = Common.dom.element("button", {
+            className: "button button-quiet",
+            text: "비밀번호 초기화",
+            type: "button"
+        });
+        saveButton.addEventListener("click", () => {
+            saveUser(id, roleSelect.value, useSelect.value, saveButton);
+        }, { signal: controller.signal });
+        resetButton.addEventListener("click", () => resetPassword(id, resetButton), {
+            signal: controller.signal
+        });
+        actions.append(saveButton, resetButton);
+        return actions;
+    }
+
+    function mobileField(labelText, control) {
+        const label = Common.dom.element("label", { className: "field user-card-field" });
+        label.append(Common.dom.element("span", { text: labelText }), control);
+        return label;
+    }
+
+    function renderUserCard(cardList, row, id, role, useYn) {
+        const loginId = String(value(row, "loginId", "LOGIN_ID") || "");
+        const userName = String(value(row, "userName", "USER_NAME") || loginId || "사용자");
+        const email = String(value(row, "email", "EMAIL") || "이메일 없음");
+        const accessibleName = userName || loginId || "사용자";
+        const roleSelect = roleSelectFor(role, accessibleName);
+        const useSelect = useSelectFor(useYn, accessibleName);
+        const card = Common.dom.element("article", { className: "user-admin-card" });
+        const header = Common.dom.element("header", { className: "user-admin-card-header" });
+        const identity = Common.dom.element("div", { className: "user-card-identity" });
+        identity.append(
+            Common.dom.element("strong", { text: userName }),
+            Common.dom.element("span", { text: loginId })
+        );
+        header.append(
+            identity,
+            Common.dom.element("span", {
+                className: `user-status-badge${useYn === "Y" ? " is-active" : " is-inactive"}`,
+                text: useYn === "Y" ? "사용 중" : "중지"
+            })
+        );
+        card.append(
+            header,
+            Common.dom.element("p", { className: "user-card-email", text: email }),
+            Common.dom.element("div", { className: "user-card-control-grid" })
+        );
+        const controls = card.querySelector(".user-card-control-grid");
+        controls.append(
+            mobileField("권한", roleSelect),
+            mobileField("사용 여부", useSelect)
+        );
+        card.append(actionButtons(id, roleSelect, useSelect, "user-card-actions"));
+        cardList.appendChild(card);
+    }
+
     function renderUsers() {
         const body = query("#userTableBody");
+        const cardList = query("#userCardList");
         Common.dom.clear(body);
+        Common.dom.clear(cardList);
 
         if (!users.length) {
             const row = Common.dom.element("tr");
@@ -38,6 +127,10 @@
             empty.style.textAlign = "center";
             row.appendChild(empty);
             body.appendChild(row);
+            cardList.appendChild(Common.dom.element("div", {
+                className: "empty-state compact",
+                text: "조회된 사용자가 없습니다."
+            }));
             return;
         }
 
@@ -45,6 +138,7 @@
             const id = userId(row);
             const role = String(value(row, "roleCode", "ROLE_CODE") || "USER").toUpperCase();
             const useYn = String(value(row, "useYn", "USE_YN") || "Y").toUpperCase();
+            const accessibleName = String(value(row, "userName", "USER_NAME", "loginId", "LOGIN_ID") || "사용자");
             const tableRow = Common.dom.element("tr");
 
             tableRow.append(
@@ -54,50 +148,19 @@
             );
 
             const roleCell = cell();
-            const roleSelect = Common.dom.element("select", {
-                className: "select",
-                attrs: { "aria-label": "사용자 권한" }
-            });
-            roleSelect.append(
-                option("USER", "사용자", role === "USER"),
-                option("ADMIN", "관리자", role === "ADMIN")
-            );
+            const roleSelect = roleSelectFor(role, accessibleName);
             roleCell.appendChild(roleSelect);
 
             const useCell = cell();
-            const useSelect = Common.dom.element("select", {
-                className: "select",
-                attrs: { "aria-label": "사용 여부" }
-            });
-            useSelect.append(
-                option("Y", "사용", useYn === "Y"),
-                option("N", "중지", useYn === "N")
-            );
+            const useSelect = useSelectFor(useYn, accessibleName);
             useCell.appendChild(useSelect);
 
             const actionCell = cell();
-            const actions = Common.dom.element("div", { className: "table-actions" });
-            const saveButton = Common.dom.element("button", {
-                className: "button button-secondary",
-                text: "저장",
-                type: "button"
-            });
-            const resetButton = Common.dom.element("button", {
-                className: "button button-quiet",
-                text: "비밀번호 초기화",
-                type: "button"
-            });
-            saveButton.addEventListener("click", () => saveUser(id, roleSelect.value, useSelect.value, saveButton), {
-                signal: controller.signal
-            });
-            resetButton.addEventListener("click", () => resetPassword(id, resetButton), {
-                signal: controller.signal
-            });
-            actions.append(saveButton, resetButton);
-            actionCell.appendChild(actions);
+            actionCell.appendChild(actionButtons(id, roleSelect, useSelect));
 
             tableRow.append(roleCell, useCell, actionCell);
             body.appendChild(tableRow);
+            renderUserCard(cardList, row, id, role, useYn);
         });
     }
 

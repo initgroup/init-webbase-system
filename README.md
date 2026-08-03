@@ -1,6 +1,6 @@
-# INIT Web Base
+# INIT Members
 
-FastAPI, Oracle 시스템 DB, 정적 HTML/CSS/JavaScript로 구성한 인아이티 인증 업무 포털의 공통 개발 기반입니다. 로그인 세션, 계정, 사용자, 공지사항과 AI 학습 현황 기능을 제공합니다.
+FastAPI, Oracle 시스템 DB, 정적 HTML/CSS/JavaScript로 구성한 인아이티 직원전용 업무 포털입니다. 로그인 세션, 계정, 사용자, 공지사항과 AI 학습 현황 기능을 제공합니다.
 
 프론트엔드는 빌드 과정 없이 `frontend/`의 정적 파일을 그대로 서비스하며 Node.js나 npm 설치는 필요하지 않습니다. 기업 홈페이지는 별도 `init-homepage` 프로젝트에서 관리합니다.
 
@@ -123,13 +123,13 @@ powershell -NoProfile -ExecutionPolicy Bypass -File .\scripts\run-server.ps1
 
 VS Code의 `Terminal: Run Task`에서 다음 작업을 바로 실행할 수 있습니다.
 
-- `INIT Web Base: Setup Venv`: Python 3.12 `venv` 생성과 `requirements.txt` 설치
-- `INIT Web Base: Run Server`: `venv` Python으로 개발 서버 실행
-- `INIT Web Base: Validate Source`: Python, JavaScript, SQL ID, PowerShell, VS Code 설정 검증
-- `INIT Web Base: Backup Source`: `Working` 또는 `Git` 백업 방식 선택
-- `INIT Web Base: Backup Working Source`: 미커밋 변경을 포함하되 비밀 파일과 생성물을 제외하고 백업
-- `INIT Web Base: Backup Git Source`: 현재 `HEAD`의 추적 소스와 전체 Git 이력 bundle 백업
-- `INIT Web Base: Publish Main (Explicit Commit + Push)`: 사용자가 배포를 명시적으로 요청했을 때만 변경 전체를 커밋하고 `main`을 rebase한 뒤 원격 저장소로 push
+- `INIT Members: Setup Venv`: Python 3.12 `venv` 생성과 `requirements.txt` 설치
+- `INIT Members: Run Server`: `venv` Python으로 개발 서버 실행
+- `INIT Members: Validate Source`: Python, JavaScript, SQL ID, PowerShell, VS Code 설정 검증
+- `INIT Members: Backup Source`: `Working` 또는 `Git` 백업 방식 선택
+- `INIT Members: Backup Working Source`: 미커밋 변경을 포함하되 비밀 파일과 생성물을 제외하고 백업
+- `INIT Members: Backup Git Source`: 현재 `HEAD`의 추적 소스와 전체 Git 이력 bundle 백업
+- `INIT Members: Publish Main (Explicit Commit + Push)`: 사용자가 배포를 명시적으로 요청했을 때만 변경 전체를 커밋하고 `main`을 rebase한 뒤 원격 저장소로 push
 
 동일한 작업은 터미널에서도 실행할 수 있습니다.
 
@@ -142,8 +142,8 @@ VS Code의 `Terminal: Run Task`에서 다음 작업을 바로 실행할 수 있�
 
 백업은 다른 프로젝트의 백업 폴더를 건드리지 않고 다음 프로젝트 전용 경로에 생성됩니다.
 
-- Working 백업: `D:\work\backup\init-webbase-system_WORKING_BACKUP\<yyyyMMdd-HHmmss>`
-- Git 백업: `D:\work\backup\init-webbase-system_GIT_BACKUP\<yyyyMMdd-HHmmss>`
+- Working 백업: `D:\work\backup\initgroup-members_WORKING_BACKUP\<yyyyMMdd-HHmmss>`
+- Git 백업: `D:\work\backup\initgroup-members_GIT_BACKUP\<yyyyMMdd-HHmmss>`
 
 `Working` 백업은 현재 미커밋 변경과 신규 파일을 포함하고 `.git`, `venv`, `.env`, 비밀 파일, 지갑, Instant Client와 생성 캐시는 제외합니다. `Git` 백업에는 현재 `HEAD`의 파일과 전체 브랜치·태그 이력을 복원할 수 있는 `repository.bundle`이 함께 저장됩니다.
 
@@ -153,10 +153,10 @@ VS Code의 `Terminal: Run Task`에서 다음 작업을 바로 실행할 수 있�
 
 ```powershell
 git init -b main
-git remote add origin https://github.com/initgroup/init-webbase-system.git
+git remote add origin https://github.com/initgroup/initgroup-members.git
 ```
 
-`git-publish-main.ps1`을 터미널이나 VS Code 배포 작업에서 실행하면 추가 확인 없이 `git add -A`, 커밋, `pull --rebase`, `push`를 수행합니다. 커밋 메시지는 저장소 폴더명을 시스템명으로 사용해 `init-webbase-system-20260731-1`처럼 `시스템명-현재날짜-순번` 형식으로 자동 생성되며, 같은 날짜의 후속 커밋은 순번이 증가합니다. 따라서 실행 전에 `git status --short`로 포함될 변경 파일을 확인해야 합니다. Codex는 사용자가 현재 요청에서 커밋 또는 배포를 명시적으로 승인하지 않으면 이 스크립트를 실행하지 않고 변경을 워킹트리에 남깁니다. 비어 있는 새 GitHub 저장소에는 최초 `main` 브랜치를 만들고 upstream을 자동 설정하며, 이후 실행부터는 원격 `main`을 fetch/rebase한 뒤 push합니다. `.git` 메타데이터가 없는 소스 묶음에서는 `Git` 백업과 Git 배포가 안전하게 중단됩니다.
+`git-publish-main.ps1`을 터미널이나 VS Code 배포 작업에서 실행하면 추가 확인 없이 `git add -A`, 커밋, `pull --rebase`, `push`를 수행합니다. 커밋 메시지는 저장소 폴더명을 시스템명으로 사용해 `initgroup-members-20260731-1`처럼 `시스템명-현재날짜-순번` 형식으로 자동 생성되며, 같은 날짜의 후속 커밋은 순번이 증가합니다. 스크립트는 기본 배포 대상이 `https://github.com/initgroup/initgroup-members.git`인지 확인하고 다른 원격이 설정되어 있으면 중단합니다. 따라서 실행 전에 `git status --short`로 포함될 변경 파일을 확인해야 합니다. Codex는 사용자가 현재 요청에서 커밋 또는 배포를 명시적으로 승인하지 않으면 이 스크립트를 실행하지 않고 변경을 워킹트리에 남깁니다. 비어 있는 새 GitHub 저장소에는 최초 `main` 브랜치를 만들고 upstream을 자동 설정하며, 이후 실행부터는 원격 `main`을 fetch/rebase한 뒤 push합니다. `.git` 메타데이터가 없는 소스 묶음에서는 `Git` 백업과 Git 배포가 안전하게 중단됩니다.
 
 JavaScript 검증에는 Node.js가 있을 때 `node --check`를 사용합니다. Node.js가 없어도 웹 애플리케이션 실행에는 영향이 없으며 검증 매크로는 해당 단계만 건너뜁니다.
 
@@ -166,7 +166,7 @@ JavaScript 검증에는 Node.js가 있을 때 `node --check`를 사용합니다.
 
 | 설정 | 값 |
 | --- | --- |
-| Repository | `https://github.com/initgroup/init-webbase-system` |
+| Repository | `https://github.com/initgroup/initgroup-members` |
 | Branch | `main` |
 | Root Directory | 비워 둠 |
 | Language | `Python 3` |

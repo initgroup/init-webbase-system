@@ -5,7 +5,7 @@
     --color-border: #dbe3ee;
     --color-border-strong: #c6d2e1;
     --color-text: #182233;
-    --color-muted: #64748b;
+    --color-muted: #5b6b82;
     --color-primary: #0879a6;
     --color-primary-dark: #075f83;
     --color-primary-soft: #ecfeff;
@@ -337,16 +337,6 @@ body.app-booting .app-boot-screen {
     color: #e2e8f0;
 }
 
-.nav-link[data-visited="true"]:not([aria-current="page"])::after {
-    width: 5px;
-    height: 5px;
-    margin-left: auto;
-    border-radius: 50%;
-    background: var(--skin-accent);
-    content: "";
-    opacity: 0.72;
-}
-
 .nav-icon {
     display: grid;
     flex: 0 0 26px;
@@ -539,7 +529,7 @@ body.auth-screen .page-host {
     box-shadow: var(--shadow-sm);
 }
 
-.panel + .panel {
+.page > .panel + .panel {
     margin-top: 18px;
 }
 
@@ -858,7 +848,8 @@ body.auth-screen .page-host {
     z-index: 1;
     margin: 11px 0 0;
     color: var(--color-muted);
-    font-size: 0.73rem;
+    font-size: 0.78rem;
+    line-height: 1.45;
 }
 
 .home-dashboard {
@@ -920,7 +911,7 @@ body.auth-screen .page-host {
 
 .home-updated-at {
     color: var(--color-muted);
-    font-size: 0.72rem;
+    font-size: 0.78rem;
 }
 
 .dashboard-primary-grid,
@@ -950,7 +941,7 @@ body.auth-screen .page-host {
 .panel-kicker {
     margin: 0 0 5px !important;
     color: var(--color-primary) !important;
-    font-size: 0.66rem !important;
+    font-size: 0.75rem !important;
     font-weight: 850;
     letter-spacing: 0.13em;
 }
@@ -1090,7 +1081,7 @@ body.auth-screen .page-host {
 
 .chart-summary-row span {
     color: var(--color-muted);
-    font-size: 0.73rem;
+    font-size: 0.78rem;
 }
 
 .chart-summary-row strong {
@@ -1213,7 +1204,7 @@ body.auth-screen .page-host {
     border-radius: 10px;
     color: #475569;
     background: #f1f5f9;
-    font-size: 0.72rem;
+    font-size: 0.78rem;
     line-height: 1.55;
 }
 
@@ -1358,7 +1349,7 @@ body.auth-screen .page-host {
 .insight-item small {
     margin-top: 3px;
     color: var(--color-muted);
-    font-size: 0.68rem;
+    font-size: 0.75rem;
     line-height: 1.45;
 }
 
@@ -1524,7 +1515,7 @@ body.auth-screen .page-host {
 
 .data-table .select {
     min-width: 100px;
-    min-height: 36px;
+    min-height: 44px;
     padding: 6px 9px;
 }
 
@@ -1534,9 +1525,107 @@ body.auth-screen .page-host {
 }
 
 .table-actions .button {
-    min-height: 34px;
+    min-height: 44px;
     padding: 6px 10px;
     font-size: 0.78rem;
+}
+
+.user-card-list {
+    display: none;
+}
+
+.user-admin-card {
+    display: grid;
+    padding: 16px;
+    gap: 14px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-md);
+    background: var(--color-surface);
+    box-shadow: var(--shadow-sm);
+}
+
+.user-admin-card-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+}
+
+.user-card-identity {
+    min-width: 0;
+}
+
+.user-card-identity strong,
+.user-card-identity span {
+    display: block;
+}
+
+.user-card-identity strong {
+    overflow: hidden;
+    font-size: 1rem;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.user-card-identity span,
+.user-card-email {
+    overflow-wrap: anywhere;
+    color: var(--color-muted);
+    font-size: 0.8rem;
+}
+
+.user-card-identity span {
+    margin-top: 3px;
+}
+
+.user-card-email {
+    margin: -4px 0 0;
+}
+
+.user-status-badge {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.user-status-badge.is-active {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+}
+
+.user-status-badge.is-inactive {
+    color: var(--color-danger);
+    background: var(--color-danger-soft);
+}
+
+.user-card-control-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.user-card-field {
+    min-width: 0;
+}
+
+.user-card-field .select {
+    width: 100%;
+    min-height: 44px;
+}
+
+.user-card-actions {
+    display: grid;
+    grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr);
+    gap: 8px;
+}
+
+.user-card-actions .button {
+    width: 100%;
+    min-height: 44px;
+    padding-inline: 10px;
 }
 
 .split-layout {
@@ -1981,7 +2070,7 @@ body.auth-screen .page-host {
 .login-card-eyebrow {
     margin: 0 0 8px !important;
     color: var(--color-primary) !important;
-    font-size: 0.68rem !important;
+    font-size: 0.75rem !important;
     font-weight: 850;
     letter-spacing: 0.15em;
 }
@@ -2000,6 +2089,10 @@ body.auth-screen .page-host {
 .login-form {
     display: grid;
     gap: 18px;
+}
+
+.login-form .inline-status:empty {
+    display: none;
 }
 
 .login-form .button-primary {
@@ -2071,7 +2164,7 @@ body.auth-screen .page-host {
     overflow: hidden;
     margin-top: 2px;
     color: var(--color-muted);
-    font-size: 0.65rem;
+    font-size: 0.75rem;
     line-height: 1.35;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -2080,7 +2173,7 @@ body.auth-screen .page-host {
 .login-security-note {
     margin: 18px 0 0;
     color: var(--color-muted);
-    font-size: 0.7rem;
+    font-size: 0.75rem;
     text-align: center;
 }
 
@@ -2366,8 +2459,12 @@ body.auth-screen .page-host {
     }
 
     .login-intro {
-        min-height: 300px;
+        min-height: 265px;
         padding: clamp(28px, 6vw, 44px);
+    }
+
+    .login-hero-eyebrow {
+        margin-top: 26px !important;
     }
 
     .login-intro-copy h1 {
@@ -2377,6 +2474,11 @@ body.auth-screen .page-host {
 
     .login-card {
         padding: clamp(30px, 7vw, 48px);
+    }
+
+    .login-data-visual,
+    .login-intro-footer {
+        display: none;
     }
 }
 
@@ -2483,6 +2585,15 @@ body.auth-screen .page-host {
         grid-template-columns: 1fr;
     }
 
+    #page-admin-users .table-wrap {
+        display: none;
+    }
+
+    .user-card-list {
+        display: grid;
+        gap: 12px;
+    }
+
     .field-span {
         grid-column: auto;
     }
@@ -2551,7 +2662,32 @@ body.auth-screen .page-host {
 
 @media (max-width: 480px) {
     .home-metric-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+
+    .home-metric-grid .metric-card {
+        min-height: 132px;
+        padding: 14px;
+    }
+
+    .home-metric-grid .metric-card span {
+        font-size: 0.78rem;
+    }
+
+    .home-metric-grid .metric-card strong {
+        margin-top: 10px;
+        font-size: 1.65rem;
+    }
+
+    .home-metric-grid .metric-card .metric-icon {
+        width: 27px;
+        height: 27px;
+    }
+
+    .home-metric-grid .metric-detail {
+        margin-top: 9px;
+        font-size: 0.75rem;
     }
 
     .home-title-row {
@@ -2582,6 +2718,171 @@ body.auth-screen .page-host {
 
     .bar-chart-column > span:last-child {
         font-size: 0.58rem;
+    }
+
+    .login-intro {
+        min-height: 176px;
+        padding: max(20px, env(safe-area-inset-top)) 20px 22px;
+    }
+
+    .login-logo {
+        width: 104px;
+    }
+
+    .login-hero-eyebrow {
+        margin: 18px 0 7px !important;
+    }
+
+    .login-intro-copy h1 {
+        margin: 0;
+        font-size: 1.65rem;
+        line-height: 1.08;
+    }
+
+    .login-hero-description,
+    .login-capability-list {
+        display: none;
+    }
+
+    .login-card {
+        padding: 24px 20px max(30px, env(safe-area-inset-bottom));
+    }
+
+    .login-card header {
+        margin-bottom: 18px;
+    }
+
+    .login-card header p:last-child {
+        display: none;
+    }
+
+    .login-form {
+        gap: 14px;
+    }
+
+    .login-support-links {
+        margin-top: 16px;
+    }
+
+    .login-support-link {
+        min-height: 62px;
+    }
+
+    .login-security-note {
+        margin-top: 14px;
+    }
+
+    .user-card-control-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-height: 600px) and (orientation: landscape) and (min-width: 700px) {
+    .login-page {
+        padding: 12px;
+    }
+
+    .login-shell {
+        display: grid;
+        grid-template-columns: minmax(260px, 0.8fr) minmax(380px, 1.2fr);
+        width: min(980px, 100%);
+        min-height: calc(100vh - 24px);
+        min-height: calc(100dvh - 24px);
+    }
+
+    .login-intro {
+        min-height: calc(100vh - 24px);
+        min-height: calc(100dvh - 24px);
+        padding: 22px 26px;
+    }
+
+    .login-logo {
+        width: 104px;
+    }
+
+    .login-brand-badge,
+    .login-data-visual,
+    .login-intro-footer,
+    .login-hero-description,
+    .login-capability-list {
+        display: none;
+    }
+
+    .login-hero-eyebrow {
+        margin: 28px 0 8px !important;
+    }
+
+    .login-intro-copy h1 {
+        margin-bottom: 0;
+        font-size: clamp(1.8rem, 4vw, 2.35rem);
+    }
+
+    .login-card {
+        justify-content: flex-start;
+        padding: 18px 28px;
+    }
+
+    .login-card header {
+        margin-bottom: 12px;
+    }
+
+    .login-card header p,
+    .login-security-note {
+        display: none;
+    }
+
+    .login-card h2 {
+        font-size: 1.45rem;
+    }
+
+    .login-card-eyebrow {
+        margin-bottom: 4px !important;
+    }
+
+    .login-form {
+        gap: 8px;
+    }
+
+    .login-form .button-primary {
+        min-height: 46px;
+        margin-top: 2px;
+    }
+
+    .login-support-links {
+        margin-top: 12px;
+    }
+
+    .login-support-link {
+        min-height: 54px;
+    }
+}
+
+@media (max-height: 600px) and (orientation: landscape) and (max-width: 699px) {
+    .login-intro {
+        display: none;
+    }
+
+    .login-card {
+        min-height: 100vh;
+        min-height: 100dvh;
+        padding-block: 18px;
+    }
+
+    .login-card header {
+        margin-bottom: 12px;
+    }
+
+    .login-card header p,
+    .login-security-note {
+        display: none;
+    }
+
+    .login-form {
+        gap: 10px;
+    }
+
+    .login-support-links {
+        margin-top: 12px;
     }
 }
 

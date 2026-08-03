@@ -47,12 +47,13 @@
                 <tbody id="userTableBody"></tbody>
             </table>
         </div>
+        <div id="userCardList" class="user-card-list" aria-label="모바일 사용자 목록"></div>
     </section>
 
-    <dialog id="temporaryPasswordDialog" class="dialog">
+    <dialog id="temporaryPasswordDialog" class="dialog" aria-labelledby="temporaryPasswordDialogTitle">
         <header class="dialog-header">
             <div>
-                <h3>임시 비밀번호</h3>
+                <h3 id="temporaryPasswordDialogTitle">임시 비밀번호</h3>
                 <p>이 값은 지금 한 번만 표시될 수 있습니다. 안전한 방법으로 사용자에게 전달해 주세요.</p>
             </div>
             <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>

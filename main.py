@@ -41,7 +41,7 @@ async def lifespan(_: FastAPI):
 
 
 app = FastAPI(
-    title=os.getenv("APP_NAME", "INIT Data Intelligence"),
+    title=os.getenv("APP_NAME", "INIT Members"),
     lifespan=lifespan,
 )
 
@@ -268,7 +268,7 @@ def health():
     return {
         "status": "success",
         "message": "API server is running.",
-        "appName": os.getenv("APP_NAME", "INIT Data Intelligence"),
+        "appName": os.getenv("APP_NAME", "INIT Members"),
     }
 
 

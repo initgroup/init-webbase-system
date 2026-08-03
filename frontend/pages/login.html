@@ -5,24 +5,24 @@
             <div class="login-intro-copy">
                 <div class="login-brand-row">
                     <img class="login-logo" src="./assets/init-logo.png" alt="INIT">
-                    <span class="login-brand-badge">DATA INTELLIGENCE</span>
+                    <span class="login-brand-badge">EMPLOYEE PORTAL</span>
                 </div>
-                <p id="loginHeroEyebrow" class="login-hero-eyebrow">AI × NATIONAL STATISTICS</p>
+                <p id="loginHeroEyebrow" class="login-hero-eyebrow">INIT MEMBERS ONLY</p>
                 <h1 id="loginTitle">
-                    <span class="login-title-line">국가통계를 읽는 AI,</span>
-                    <span class="login-title-line">미래를 설계하는 인사이트</span>
+                    <span class="login-title-line">함께 일하는 인아이티,</span>
+                    <span class="login-title-line">업무와 소식을 한곳에서</span>
                 </h1>
-                <p id="loginHeroDescription" class="login-hero-description">공식 통계와 인공지능 분석을 연결해 정책과 산업의 다음 결정을 더 빠르고 정확하게 만듭니다.</p>
-                <div class="login-capability-list" aria-label="핵심 전문 분야">
-                    <span>국가통계 시스템</span>
-                    <span>AI·통계 분석</span>
-                    <span>데이터 품질 운영</span>
+                <p id="loginHeroDescription" class="login-hero-description">인아이티 직원이 필요한 사내 공지와 업무 정보를 한곳에서 안전하고 편리하게 확인합니다.</p>
+                <div class="login-capability-list" aria-label="직원전용 주요 서비스">
+                    <span>사내 공지</span>
+                    <span>업무 현황</span>
+                    <span>계정·권한 지원</span>
                 </div>
             </div>
 
             <div class="login-data-visual" aria-hidden="true">
                 <div class="login-data-visual-head">
-                    <span id="loginSignalLabel">NATIONAL DATA SIGNAL</span>
+                    <span id="loginSignalLabel">INTERNAL SERVICE STATUS</span>
                     <strong><i></i> READY</strong>
                 </div>
                 <div class="login-data-chart">
@@ -38,23 +38,23 @@
                     </svg>
                 </div>
                 <div class="login-data-visual-foot">
-                    <span><strong>PROFILE</strong> 데이터 구조</span>
-                    <span><strong>RULE</strong> 설명 가능한 규칙</span>
-                    <span><strong>TRACE</strong> 검증 이력</span>
+                    <span><strong>NOTICE</strong> 사내 소식</span>
+                    <span><strong>WORK</strong> 업무 현황</span>
+                    <span><strong>SUPPORT</strong> 계정 지원</span>
                 </div>
             </div>
 
             <footer class="login-intro-footer">
-                <small id="loginAppName">웹 사이트</small>
-                <span>AI & Statistics Intelligence Platform</span>
+                <small id="loginAppName">INIT Members</small>
+                <span>Employee Workspace</span>
             </footer>
         </section>
 
         <section class="login-card" aria-labelledby="loginFormTitle">
             <header>
-                <p class="login-card-eyebrow">SECURE ACCESS</p>
-                <h2 id="loginFormTitle">인사이트 플랫폼 로그인</h2>
-                <p>승인된 계정으로 안전하게 접속하세요.</p>
+                <p class="login-card-eyebrow">EMPLOYEE ONLY</p>
+                <h2 id="loginFormTitle">인아이티 직원전용 로그인</h2>
+                <p>인아이티 직원으로 승인된 계정만 안전하게 접속할 수 있습니다.</p>
             </header>
 
             <form id="loginForm" class="login-form">
@@ -74,8 +74,8 @@
                 <button id="openSignupButton" class="login-support-link" type="button">
                     <span class="login-support-icon" aria-hidden="true">＋</span>
                     <span>
-                        <strong>새 계정 신청</strong>
-                        <small>서비스 이용 권한 요청</small>
+                        <strong>직원 계정 신청</strong>
+                        <small>사내 서비스 이용 권한 요청</small>
                     </span>
                 </button>
                 <button id="openAdminContactButton" class="login-support-link" type="button">
@@ -87,16 +87,16 @@
                 </button>
             </div>
 
-            <p class="login-security-note"><span aria-hidden="true">●</span> 모든 접속은 서버 세션 기반으로 안전하게 보호됩니다.</p>
+            <p class="login-security-note"><span aria-hidden="true">●</span> 직원전용 시스템은 서버 세션으로 안전하게 보호됩니다.</p>
         </section>
     </div>
 
-    <dialog id="signupDialog" class="dialog">
+    <dialog id="signupDialog" class="dialog" aria-labelledby="signupDialogTitle">
         <form id="signupForm">
             <header class="dialog-header">
                 <div>
-                    <h2>회원가입</h2>
-                    <p>관리자 가입을 선택하면 초기 관리자 키가 필요합니다.</p>
+                    <h2 id="signupDialogTitle">직원 계정 신청</h2>
+                    <p>신청한 계정은 관리자 승인 후 사용할 수 있습니다. 최초 관리자 가입에는 초기 관리자 키가 필요합니다.</p>
                 </div>
                 <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>
             </header>
@@ -125,29 +125,29 @@
                     <label class="field field-span">
                         <span class="required">가입 유형</span>
                         <select id="signupRoleCode" class="select">
-                            <option value="USER">일반 사용자</option>
+                            <option value="USER">일반 직원</option>
                             <option value="ADMIN">관리자</option>
                         </select>
                     </label>
                     <label id="signupAdminKeyField" class="field field-span" hidden>
                         <span class="required">초기 관리자 키</span>
                         <input id="signupAdminKey" class="input" type="password" maxlength="1024" autocomplete="off">
-                        <small class="field-help">관리자 가입 권한은 서버에서 다시 검증합니다.</small>
+                        <small class="field-help">관리자 권한은 서버에서 다시 검증합니다.</small>
                     </label>
                 </div>
                 <p id="signupStatus" class="inline-status" aria-live="polite"></p>
             </div>
             <footer class="dialog-footer">
                 <button class="button button-secondary" type="button" data-dialog-close>취소</button>
-                <button class="button button-primary" type="submit">가입 신청</button>
+                <button class="button button-primary" type="submit">계정 신청</button>
             </footer>
         </form>
     </dialog>
 
-    <dialog id="adminContactDialog" class="dialog">
+    <dialog id="adminContactDialog" class="dialog" aria-labelledby="adminContactDialogTitle">
         <header class="dialog-header">
             <div>
-                <h2>로그인 도움</h2>
+                <h2 id="adminContactDialogTitle">로그인 도움</h2>
                 <p>비밀번호 재설정이 필요하면 관리자에게 문의하세요.</p>
             </div>
             <button class="dialog-close" type="button" data-dialog-close aria-label="닫기">×</button>
