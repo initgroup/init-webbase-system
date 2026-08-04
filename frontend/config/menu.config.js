@@ -29,6 +29,14 @@ window.MENU_CONFIG = [
             },
             {
                 type: "page",
+                page: "admin-projects",
+                label: "프로젝트 관리",
+                title: "프로젝트 관리",
+                icon: "▦",
+                roles: ["ADMIN"]
+            },
+            {
+                type: "page",
                 page: "admin-notices",
                 label: "공지사항 관리",
                 title: "공지사항 관리",
@@ -48,6 +56,6 @@ window.MENU_CONFIG = [
 ];
 
 window.PAGE_FILE_CONFIG = {
-    htmlPages: ["login", "home", "account", "admin-users", "admin-notices", "admin-site-settings"],
-    scriptPages: ["login", "home", "account", "admin-users", "admin-notices", "admin-site-settings"]
+    htmlPages: ["login", "home", "account", "admin-users", "admin-projects", "admin-notices", "admin-site-settings"],
+    scriptPages: ["login", "home", "account", "admin-users", "admin-projects", "admin-notices", "admin-site-settings"]
 };

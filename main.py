@@ -21,7 +21,15 @@ from backend.auth_context import (
 )
 from backend.database import close_db_pool
 from backend.rate_limit import check_auth_rate_limit
-from backend.routers import account, admin_notices, admin_users, auth, home, site_settings
+from backend.routers import (
+    account,
+    admin_notices,
+    admin_projects,
+    admin_users,
+    auth,
+    home,
+    site_settings,
+)
 
 
 logging.basicConfig(level=os.getenv("LOG_LEVEL", "INFO").upper())
@@ -265,6 +273,11 @@ app.include_router(home.router, prefix="/api/home", tags=["home"])
 app.include_router(account.router, prefix="/api/account", tags=["account"])
 app.include_router(site_settings.public_router, prefix="/api/site", tags=["site"])
 app.include_router(admin_users.router, prefix="/api/admin/users", tags=["admin-users"])
+app.include_router(
+    admin_projects.router,
+    prefix="/api/admin/projects",
+    tags=["admin-projects"],
+)
 app.include_router(
     admin_notices.router,
     prefix="/api/admin/notices",

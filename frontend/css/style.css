@@ -763,6 +763,24 @@ body.auth-screen .page-host {
     flex: 1 1 260px;
 }
 
+.project-search-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(150px, 1fr));
+    align-items: end;
+    margin-bottom: 16px;
+    gap: 12px;
+}
+
+.project-search-keyword {
+    grid-column: span 2;
+}
+
+.project-search-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+}
+
 .metric-grid {
     display: grid;
     grid-template-columns: repeat(4, minmax(0, 1fr));
@@ -1511,6 +1529,192 @@ body.auth-screen .page-host {
 
 .data-table tbody tr:hover {
     background: #f8fbff;
+}
+
+.data-table tbody tr[data-grid-row-key] {
+    cursor: pointer;
+}
+
+.data-table tbody tr[data-grid-row-key]:focus-visible {
+    outline: 3px solid rgb(37 99 235 / 0.25);
+    outline-offset: -3px;
+}
+
+.data-table tbody tr.is-selected,
+.data-table tbody tr.is-selected:hover {
+    background: var(--color-primary-soft);
+    box-shadow: inset 3px 0 0 var(--color-primary);
+}
+
+.grid-empty-cell {
+    height: 120px;
+    color: var(--color-muted);
+    text-align: center !important;
+}
+
+.grid-sort-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 3px 0;
+    gap: 5px;
+    border: 0;
+    color: inherit;
+    background: transparent;
+    font: inherit;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.grid-sort-button:hover,
+.grid-sort-button.is-active {
+    color: var(--color-primary);
+}
+
+.grid-sort-button [data-grid-sort-indicator] {
+    min-width: 10px;
+    color: #94a3b8;
+    font-size: 0.68rem;
+}
+
+.grid-sort-button.is-active [data-grid-sort-indicator] {
+    color: var(--color-primary);
+}
+
+.grid-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 16px;
+    gap: 6px;
+}
+
+.grid-page-button {
+    min-width: 38px;
+    min-height: 38px;
+    padding: 6px 10px;
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius-sm);
+    color: #475569;
+    background: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.grid-page-button:hover:not(:disabled) {
+    border-color: var(--color-primary);
+    color: var(--color-primary);
+    background: var(--color-primary-soft);
+}
+
+.grid-page-button.is-current {
+    border-color: var(--color-primary);
+    color: #fff;
+    background: var(--color-primary);
+}
+
+.grid-page-button:disabled {
+    opacity: 0.45;
+    cursor: not-allowed;
+}
+
+.project-table-wrap {
+    max-height: 590px;
+    overflow: auto;
+}
+
+.project-data-table {
+    min-width: 1740px;
+}
+
+.project-data-table thead {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.project-data-table .number-column {
+    text-align: right;
+}
+
+.project-name-cell {
+    width: 280px;
+    max-width: 280px;
+}
+
+.project-name-cell strong {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.project-status-badge {
+    display: inline-flex;
+    padding: 5px 9px;
+    border-radius: 999px;
+    color: #475569;
+    background: #eef2f7;
+    font-size: 0.74rem;
+    font-weight: 800;
+}
+
+.project-status-badge.is-in-progress,
+.project-status-badge.is-contracted {
+    color: var(--color-primary-dark);
+    background: var(--color-primary-soft);
+}
+
+.project-status-badge.is-completed {
+    color: var(--color-success);
+    background: var(--color-success-soft);
+}
+
+.project-status-badge.is-cancelled {
+    color: var(--color-danger);
+    background: var(--color-danger-soft);
+}
+
+.project-status-badge.is-bidding {
+    color: #9a3412;
+    background: #fff7ed;
+}
+
+.project-form-grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+
+.project-name-field {
+    grid-column: span 2;
+}
+
+.project-audit-info {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 18px 0 0;
+    padding: 12px 14px;
+    gap: 12px 28px;
+    border-radius: var(--radius-sm);
+    color: var(--color-muted);
+    background: var(--color-surface-soft);
+    font-size: 0.8rem;
+}
+
+.project-audit-info[hidden] {
+    display: none;
+}
+
+.project-audit-info div {
+    display: flex;
+    gap: 7px;
+}
+
+.project-audit-info dt {
+    color: #475569;
+    font-weight: 800;
+}
+
+.project-audit-info dd {
+    margin: 0;
 }
 
 .password-reset-policy {
@@ -2543,6 +2747,11 @@ body.auth-screen .page-host {
         max-height: 320px;
     }
 
+    .project-search-grid,
+    .project-form-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
     .skin-template-grid {
         grid-template-columns: repeat(2, minmax(0, 1fr));
     }
@@ -2691,6 +2900,21 @@ body.auth-screen .page-host {
 
     .form-grid {
         grid-template-columns: 1fr;
+    }
+
+    .project-search-grid,
+    .project-form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .project-search-keyword,
+    .project-name-field {
+        grid-column: auto;
+    }
+
+    .project-search-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
     }
 
     #page-admin-users .table-wrap {
