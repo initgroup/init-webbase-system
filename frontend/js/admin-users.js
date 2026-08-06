@@ -6,6 +6,10 @@
     let users = [];
     let temporaryAccess = null;
     let reloadUsersAfterTemporaryDialog = false;
+    let selectedUserId = null;
+    let pendingPasswordResetUserId = null;
+    let localPhotoUrl = null;
+    const EMPLOYMENT_STATUS_LABELS = { ACTIVE: "재직", LEAVE: "휴직", RETIRED: "퇴직" };
 
     function query(selector) {
         return root?.querySelector(selector) || null;
@@ -19,167 +23,131 @@
         return value(row, "userId", "USER_ID", "id", "ID");
     }
 
-    function option(valueText, label, selected) {
-        const element = Common.dom.element("option", { text: label, value: valueText });
-        element.selected = selected;
-        return element;
+    function cell(text = "", className = "") {
+        return Common.dom.element("td", { text: text ?? "", className });
     }
 
-    function cell(text = "") {
-        return Common.dom.element("td", { text: text ?? "" });
+    function passwordChangeLabel(passwordChangeYn) {
+        return String(passwordChangeYn || "N").toUpperCase() === "Y" ? "변경 완료" : "변경 필요";
     }
 
-    function inputFor(valueText, accessibleName, fieldName, options = {}) {
-        return Common.dom.element("input", {
-            className: `input user-admin-input${options.readOnly ? " is-readonly" : ""}`,
-            type: options.type || "text",
-            value: valueText,
-            attrs: {
-                "aria-label": `${accessibleName} ${fieldName}`,
-                maxlength: options.maxLength,
-                required: options.required ? "" : null,
-                disabled: options.readOnly ? "" : null
-            }
+    function dateValue(nextValue) {
+        return nextValue ? String(nextValue).slice(0, 10) : "";
+    }
+
+    function setValue(selector, nextValue) {
+        const element = query(selector);
+        if (element) element.value = nextValue ?? "";
+    }
+
+    function updateAge() {
+        const birthDate = query("#userBirthDate")?.value;
+        if (!birthDate) {
+            setValue("#userAge", "-");
+            return;
+        }
+        const [year, month, day] = birthDate.split("-").map(Number);
+        const today = new Date();
+        let age = today.getFullYear() - year;
+        if (today.getMonth() + 1 < month || (today.getMonth() + 1 === month && today.getDate() < day)) age -= 1;
+        setValue("#userAge", age >= 0 ? `만 ${age}세` : "-");
+    }
+
+    function clearLocalPhotoUrl() {
+        if (localPhotoUrl) URL.revokeObjectURL(localPhotoUrl);
+        localPhotoUrl = null;
+    }
+
+    function setPhotoPreview(row = {}) {
+        clearLocalPhotoUrl();
+        const id = userId(row);
+        const hasPhoto = Boolean(value(row, "photoFileName", "PHOTO_FILE_NAME"));
+        const image = query("#userPhotoPreview");
+        const placeholder = query("#userPhotoPlaceholder");
+        query("#userPhotoFile").value = "";
+        query("#userPhotoFile").disabled = !id;
+        query("#uploadUserPhotoButton").disabled = !id;
+        query("#deleteUserPhotoButton").hidden = !id || !hasPhoto;
+        if (id && hasPhoto) {
+            const version = encodeURIComponent(value(row, "photoUpdatedAt", "PHOTO_UPDATED_AT") || Date.now());
+            image.src = `/api/admin/users/${encodeURIComponent(id)}/photo?v=${version}`;
+            image.hidden = false;
+            placeholder.hidden = true;
+        } else {
+            image.removeAttribute("src");
+            image.hidden = true;
+            placeholder.hidden = false;
+        }
+    }
+
+    function fillUserForm(row = {}) {
+        const id = userId(row) || "";
+        const passwordChangeYn = value(row, "passwordChangeYn", "PASSWORD_CHANGE_YN");
+        query("#userForm")?.reset();
+        query("#userId").value = id;
+        query("#userLoginId").value = value(row, "loginId", "LOGIN_ID") || "";
+        query("#userName").value = value(row, "userName", "USER_NAME") || "";
+        query("#userEmail").value = value(row, "email", "EMAIL") || "";
+        query("#userRoleCode").value = String(value(row, "roleCode", "ROLE_CODE") || "USER").toUpperCase();
+        query("#userActiveYn").value = String(value(row, "useYn", "USE_YN") || "Y").toUpperCase();
+        query("#userPasswordChangeStatus").value = id ? passwordChangeLabel(passwordChangeYn) : "-";
+        setValue("#userEmployeeNo", value(row, "employeeNo", "EMPLOYEE_NO"));
+        setValue("#userGenderCode", String(value(row, "genderCode", "GENDER_CODE") || "").toUpperCase());
+        setValue("#userBirthDate", dateValue(value(row, "birthDate", "BIRTH_DATE")));
+        setValue("#userBirthCalendarCode", String(value(row, "birthCalendarCode", "BIRTH_CALENDAR_CODE") || "SOLAR").toUpperCase());
+        setValue("#userHireDate", dateValue(value(row, "hireDate", "HIRE_DATE")));
+        setValue("#userRetirementDate", dateValue(value(row, "retirementDate", "RETIREMENT_DATE")));
+        setValue("#userEmploymentStatusCode", String(value(row, "employmentStatusCode", "EMPLOYMENT_STATUS_CODE") || "ACTIVE").toUpperCase());
+        setValue("#userEmploymentTypeCode", String(value(row, "employmentTypeCode", "EMPLOYMENT_TYPE_CODE") || "").toUpperCase());
+        setValue("#userDepartmentName", value(row, "departmentName", "DEPARTMENT_NAME"));
+        setValue("#userPositionName", value(row, "positionName", "POSITION_NAME"));
+        setValue("#userJobTitle", value(row, "jobTitle", "JOB_TITLE"));
+        setValue("#userWorkLocation", value(row, "workLocation", "WORK_LOCATION"));
+        setValue("#userMobilePhone", value(row, "mobilePhone", "MOBILE_PHONE"));
+        setValue("#userOfficePhone", value(row, "officePhone", "OFFICE_PHONE"));
+        setValue("#userHrNote", value(row, "hrNote", "HR_NOTE"));
+        updateAge();
+        setPhotoPreview(row);
+        query("#userEditorTitle").textContent = id ? "임직원 상세 및 수정" : "임직원 등록";
+        query("#userEditorDescription").textContent = id
+            ? `${query("#userName").value || query("#userLoginId").value} 계정을 수정하고 있습니다.`
+            : "새 임직원을 등록하고 있습니다.";
+        query("#deleteUserButton").hidden = !id;
+        query("#resetUserPasswordButton").hidden = !id;
+        Common.ui.setInlineStatus(query("#userEditorStatus"), "");
+        selectedUserId = id ? String(id) : null;
+        updateSelectedRow();
+    }
+
+    function updateSelectedRow() {
+        root?.querySelectorAll("#userTableBody tr[data-user-id]").forEach((row) => {
+            const selected = Boolean(selectedUserId) && row.dataset.userId === selectedUserId;
+            row.classList.toggle("is-selected", selected);
+            row.setAttribute("aria-selected", String(selected));
         });
     }
 
-    function roleSelectFor(role, accessibleName) {
-        const select = Common.dom.element("select", {
-            className: "select",
-            attrs: { "aria-label": `${accessibleName} 권한` }
-        });
-        select.append(
-            option("USER", "사용자", role === "USER"),
-            option("ADMIN", "관리자", role === "ADMIN")
-        );
-        return select;
-    }
-
-    function useSelectFor(useYn, accessibleName) {
-        const select = Common.dom.element("select", {
-            className: "select",
-            attrs: { "aria-label": `${accessibleName} 사용 여부` }
-        });
-        select.append(
-            option("Y", "사용", useYn === "Y"),
-            option("N", "중지", useYn === "N")
-        );
-        return select;
-    }
-
-    function passwordChangeStatusFor(passwordChangeYn, accessibleName) {
-        const normalized = String(passwordChangeYn || "N").toUpperCase() === "Y" ? "Y" : "N";
-        return inputFor(
-            `${normalized} (${normalized === "Y" ? "변경 완료" : "변경 필요"})`,
-            accessibleName,
-            "초기 비밀번호 변경 여부",
-            { readOnly: true }
-        );
-    }
-
-    function actionButtons(id, controls, className = "table-actions") {
-        const actions = Common.dom.element("div", { className });
-        const saveButton = Common.dom.element("button", {
-            className: "button button-secondary",
-            text: "저장",
-            type: "button"
-        });
-        const resetButton = Common.dom.element("button", {
-            className: "button button-quiet",
-            text: "비밀번호 초기화",
-            type: "button"
-        });
-        const deleteButton = Common.dom.element("button", {
-            className: "button button-danger",
-            text: "삭제",
-            type: "button"
-        });
-        saveButton.addEventListener("click", () => {
-            saveUser(id, controls, saveButton);
-        }, { signal: controller.signal });
-        resetButton.addEventListener("click", () => resetPassword(id, resetButton), {
-            signal: controller.signal
-        });
-        deleteButton.addEventListener("click", () => {
-            deleteUser(id, controls.userName.value.trim() || controls.loginId.value.trim(), deleteButton);
-        }, { signal: controller.signal });
-        actions.append(saveButton, resetButton, deleteButton);
-        return actions;
-    }
-
-    function mobileField(labelText, control) {
-        const label = Common.dom.element("label", { className: "field user-card-field" });
-        label.append(Common.dom.element("span", { text: labelText }), control);
-        return label;
-    }
-
-    function renderUserCard(cardList, row, id, role, useYn) {
-        const loginId = String(value(row, "loginId", "LOGIN_ID") || "");
-        const userName = String(value(row, "userName", "USER_NAME") || loginId || "사용자");
-        const email = String(value(row, "email", "EMAIL") || "이메일 없음");
-        const accessibleName = userName || loginId || "사용자";
-        const passwordChangeYn = String(value(row, "passwordChangeYn", "PASSWORD_CHANGE_YN") || "N").toUpperCase();
-        const controls = {
-            loginId: inputFor(loginId, accessibleName, "로그인 ID", { maxLength: 100, required: true }),
-            userName: inputFor(userName, accessibleName, "이름", { maxLength: 200, required: true }),
-            email: inputFor(email === "이메일 없음" ? "" : email, accessibleName, "이메일", {
-                type: "email",
-                maxLength: 300,
-                required: true
-            }),
-            roleCode: roleSelectFor(role, accessibleName),
-            useYn: useSelectFor(useYn, accessibleName)
-        };
-        const userIdInput = inputFor(id, accessibleName, "USER_ID", { readOnly: true });
-        const card = Common.dom.element("article", { className: "user-admin-card" });
-        const header = Common.dom.element("header", { className: "user-admin-card-header" });
-        const identity = Common.dom.element("div", { className: "user-card-identity" });
-        identity.append(
-            Common.dom.element("strong", { text: userName }),
-            Common.dom.element("span", { text: loginId })
-        );
-        header.append(
-            identity,
-            Common.dom.element("span", {
-                className: `user-status-badge${useYn === "Y" ? " is-active" : " is-inactive"}`,
-                text: useYn === "Y" ? "사용 중" : "중지"
-            })
-        );
-        card.append(
-            header,
-            Common.dom.element("div", { className: "user-card-control-grid" })
-        );
-        const controlGrid = card.querySelector(".user-card-control-grid");
-        controlGrid.append(
-            mobileField("USER_ID", userIdInput),
-            mobileField("로그인 ID", controls.loginId),
-            mobileField("이름", controls.userName),
-            mobileField("이메일", controls.email),
-            mobileField("권한", controls.roleCode),
-            mobileField("사용 여부", controls.useYn),
-            mobileField("초기 비밀번호 변경", passwordChangeStatusFor(passwordChangeYn, accessibleName))
-        );
-        card.append(actionButtons(id, controls, "user-card-actions"));
-        cardList.appendChild(card);
+    function selectUser(row) {
+        fillUserForm(row);
+        if (window.matchMedia("(max-width: 760px)").matches) {
+            query("#userEditorPanel")?.scrollIntoView({
+                behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+                block: "start"
+            });
+        }
     }
 
     function renderUsers() {
         const body = query("#userTableBody");
-        const cardList = query("#userCardList");
         Common.dom.clear(body);
-        Common.dom.clear(cardList);
 
         if (!users.length) {
             const row = Common.dom.element("tr");
-            const empty = cell("조회된 사용자가 없습니다.");
-            empty.colSpan = 8;
+            const empty = cell("조회된 임직원이 없습니다.");
+            empty.colSpan = 12;
             empty.style.textAlign = "center";
             row.appendChild(empty);
             body.appendChild(row);
-            cardList.appendChild(Common.dom.element("div", {
-                className: "empty-state compact",
-                text: "조회된 사용자가 없습니다."
-            }));
             return;
         }
 
@@ -188,62 +156,34 @@
             const role = String(value(row, "roleCode", "ROLE_CODE") || "USER").toUpperCase();
             const useYn = String(value(row, "useYn", "USE_YN") || "Y").toUpperCase();
             const passwordChangeYn = String(value(row, "passwordChangeYn", "PASSWORD_CHANGE_YN") || "N").toUpperCase();
-            const accessibleName = String(value(row, "userName", "USER_NAME", "loginId", "LOGIN_ID") || "사용자");
-            const tableRow = Common.dom.element("tr");
-            const controls = {
-                loginId: inputFor(value(row, "loginId", "LOGIN_ID") || "", accessibleName, "로그인 ID", {
-                    maxLength: 100,
-                    required: true
-                }),
-                userName: inputFor(value(row, "userName", "USER_NAME") || "", accessibleName, "이름", {
-                    maxLength: 200,
-                    required: true
-                }),
-                email: inputFor(value(row, "email", "EMAIL") || "", accessibleName, "이메일", {
-                    type: "email",
-                    maxLength: 300,
-                    required: true
-                }),
-                roleCode: roleSelectFor(role, accessibleName),
-                useYn: useSelectFor(useYn, accessibleName)
-            };
-
-            const idCell = cell();
-            idCell.appendChild(inputFor(id, accessibleName, "USER_ID", { readOnly: true }));
-            const loginIdCell = cell();
-            loginIdCell.appendChild(controls.loginId);
-            const userNameCell = cell();
-            userNameCell.appendChild(controls.userName);
-            const emailCell = cell();
-            emailCell.appendChild(controls.email);
-            const roleCell = cell();
-            roleCell.appendChild(controls.roleCode);
-            const useCell = cell();
-            useCell.appendChild(controls.useYn);
-            const passwordChangeCell = cell();
-            passwordChangeCell.appendChild(passwordChangeStatusFor(passwordChangeYn, accessibleName));
-
-            const actionCell = cell();
-            actionCell.appendChild(actionButtons(id, controls));
-
+            const employmentStatus = String(
+                value(row, "employmentStatusCode", "EMPLOYMENT_STATUS_CODE") || "ACTIVE"
+            ).toUpperCase();
+            const tableRow = Common.dom.element("tr", {
+                attrs: { tabindex: "0", "data-user-id": String(id), "aria-selected": "false" }
+            });
             tableRow.append(
-                idCell,
-                loginIdCell,
-                userNameCell,
-                emailCell,
-                roleCell,
-                useCell,
-                passwordChangeCell,
-                actionCell
+                cell(id),
+                cell(value(row, "employeeNo", "EMPLOYEE_NO") || "-"),
+                cell(value(row, "loginId", "LOGIN_ID") || "-"),
+                cell(value(row, "userName", "USER_NAME") || "-", "user-name-cell"),
+                cell(value(row, "departmentName", "DEPARTMENT_NAME") || "-"),
+                cell(value(row, "positionName", "POSITION_NAME") || "-"),
+                cell(value(row, "jobTitle", "JOB_TITLE") || "-"),
+                cell(EMPLOYMENT_STATUS_LABELS[employmentStatus] || employmentStatus),
+                cell(value(row, "email", "EMAIL") || "-"),
+                cell(role === "ADMIN" ? "관리자" : "사용자"),
+                cell(useYn === "Y" ? "사용" : "중지"),
+                cell(passwordChangeLabel(passwordChangeYn))
             );
             body.appendChild(tableRow);
-            renderUserCard(cardList, row, id, role, useYn);
         });
+        updateSelectedRow();
     }
 
     async function loadUsers() {
         const status = query("#userListStatus");
-        Common.ui.setInlineStatus(status, "사용자 목록을 불러오고 있습니다.");
+        Common.ui.setInlineStatus(status, "임직원 목록을 불러오고 있습니다.");
         try {
             const queryString = Common.api.query({
                 keyword: query("#userKeyword").value.trim(),
@@ -257,43 +197,95 @@
             });
             users = Common.data.rows(payload, "users", "items", "rows");
             renderUsers();
-            Common.ui.setInlineStatus(status, `${users.length.toLocaleString("ko-KR")}명의 사용자를 조회했습니다.`);
+            if (selectedUserId) {
+                const selectedUser = users.find((row) => String(userId(row)) === selectedUserId);
+                if (selectedUser) fillUserForm(selectedUser);
+                else fillUserForm();
+            }
+            Common.ui.setInlineStatus(status, `${users.length.toLocaleString("ko-KR")}명의 임직원을 조회했습니다.`);
         } catch (error) {
             if (error?.name === "AbortError") return;
             users = [];
             renderUsers();
-            Common.ui.setInlineStatus(status, error.message || "사용자 목록을 불러오지 못했습니다.", "error");
+            Common.ui.setInlineStatus(status, error.message || "임직원 목록을 불러오지 못했습니다.", "error");
         }
     }
 
-    async function saveUser(id, controls, button) {
-        if (!id) return;
-        const editableControls = [controls.loginId, controls.userName, controls.email];
-        const invalidControl = editableControls.find((control) => !control.checkValidity());
-        if (invalidControl) {
-            invalidControl.reportValidity();
-            return;
-        }
+    function userPayload() {
+        return {
+            loginId: query("#userLoginId").value.trim(),
+            userName: query("#userName").value.trim(),
+            email: query("#userEmail").value.trim(),
+            roleCode: query("#userRoleCode").value,
+            useYn: query("#userActiveYn").value,
+            employeeNo: query("#userEmployeeNo").value.trim() || null,
+            genderCode: query("#userGenderCode").value || null,
+            birthDate: query("#userBirthDate").value || null,
+            birthCalendarCode: query("#userBirthCalendarCode").value,
+            hireDate: query("#userHireDate").value || null,
+            retirementDate: query("#userRetirementDate").value || null,
+            employmentStatusCode: query("#userEmploymentStatusCode").value,
+            employmentTypeCode: query("#userEmploymentTypeCode").value || null,
+            departmentName: query("#userDepartmentName").value.trim() || null,
+            positionName: query("#userPositionName").value.trim() || null,
+            jobTitle: query("#userJobTitle").value.trim() || null,
+            workLocation: query("#userWorkLocation").value.trim() || null,
+            mobilePhone: query("#userMobilePhone").value.trim() || null,
+            officePhone: query("#userOfficePhone").value.trim() || null,
+            hrNote: query("#userHrNote").value.trim() || null
+        };
+    }
 
+    function validateUserForm(form) {
+        if (!form.reportValidity()) return false;
+        const birthDate = query("#userBirthDate").value;
+        const today = new Date().toISOString().slice(0, 10);
+        if (birthDate && birthDate > today) {
+            Common.ui.setInlineStatus(query("#userEditorStatus"), "생년월일은 오늘보다 늦을 수 없습니다.", "error");
+            query("#userBirthDate").focus();
+            return false;
+        }
+        const hireDate = query("#userHireDate").value;
+        const retirementDate = query("#userRetirementDate").value;
+        if (hireDate && retirementDate && retirementDate < hireDate) {
+            Common.ui.setInlineStatus(query("#userEditorStatus"), "퇴사일은 입사일보다 빠를 수 없습니다.", "error");
+            query("#userRetirementDate").focus();
+            return false;
+        }
+        return true;
+    }
+
+    async function saveUser(event) {
+        event.preventDefault();
+        const form = event.currentTarget;
+        if (!validateUserForm(form)) return;
+        const id = query("#userId").value;
+        const button = query("#saveUserButton");
+        const status = query("#userEditorStatus");
         button.disabled = true;
+        Common.ui.setInlineStatus(status, id ? "임직원 정보를 저장하고 있습니다." : "임직원을 등록하고 있습니다.");
         try {
-            await Common.api.request(`/admin/users/${encodeURIComponent(id)}`, {
-                method: "PATCH",
-                body: {
-                    loginId: controls.loginId.value.trim(),
-                    userName: controls.userName.value.trim(),
-                    email: controls.email.value.trim(),
-                    roleCode: controls.roleCode.value,
-                    useYn: controls.useYn.value
-                },
+            const payload = await Common.api.request(id ? `/admin/users/${encodeURIComponent(id)}` : "/admin/users", {
+                method: id ? "PATCH" : "POST",
+                body: userPayload(),
                 signal: controller.signal,
-                loadingMessage: "사용자 정보를 저장하고 있습니다."
+                loadingMessage: id ? "임직원 정보를 저장하고 있습니다." : "임직원을 등록하고 있습니다."
             });
-            Common.ui.toast("사용자 정보를 저장했습니다.", "success");
-            await loadUsers();
+            const data = Common.data.get(payload) || {};
+            Common.ui.toast(id ? "임직원 정보를 저장했습니다." : "임직원을 등록했습니다.", "success");
+            if (id) {
+                selectedUserId = String(id);
+                await loadUsers();
+            } else {
+                const password = value(data, "temporaryPassword", "TEMPORARY_PASSWORD", "password", "PASSWORD");
+                if (!password) throw new Error("서버 응답에서 임시 비밀번호를 확인하지 못했습니다.");
+                fillUserForm(data);
+                showTemporaryPassword(password, data);
+                reloadUsersAfterTemporaryDialog = true;
+            }
         } catch (error) {
             if (error?.name !== "AbortError") {
-                Common.ui.toast(error.message || "사용자 정보를 저장하지 못했습니다.", "error");
+                Common.ui.setInlineStatus(status, error.message || "임직원 정보를 저장하지 못했습니다.", "error");
             }
         } finally {
             button.disabled = false;
@@ -315,52 +307,97 @@
         query("#temporaryPasswordDialog")?.showModal();
     }
 
-    async function createUser(event) {
-        event.preventDefault();
-        const form = event.currentTarget;
-        const button = query("#createUserSubmitButton");
-        const status = query("#createUserStatus");
-        if (!form.reportValidity()) return;
+    function previewSelectedPhoto() {
+        const file = query("#userPhotoFile")?.files?.[0];
+        if (!file) return;
+        clearLocalPhotoUrl();
+        localPhotoUrl = URL.createObjectURL(file);
+        query("#userPhotoPreview").src = localPhotoUrl;
+        query("#userPhotoPreview").hidden = false;
+        query("#userPhotoPlaceholder").hidden = true;
+    }
 
+    async function uploadUserPhoto() {
+        const id = query("#userId").value;
+        const fileInput = query("#userPhotoFile");
+        const file = fileInput?.files?.[0];
+        if (!id) {
+            Common.ui.setInlineStatus(query("#userEditorStatus"), "임직원 정보를 먼저 저장해 주세요.", "error");
+            return;
+        }
+        if (!file) {
+            Common.ui.setInlineStatus(query("#userEditorStatus"), "저장할 프로필 사진을 선택해 주세요.", "error");
+            return;
+        }
+        if (file.size > 5 * 1024 * 1024) {
+            Common.ui.setInlineStatus(query("#userEditorStatus"), "프로필 사진은 5MB 이하여야 합니다.", "error");
+            return;
+        }
+        const formData = new FormData();
+        formData.append("file", file);
+        const button = query("#uploadUserPhotoButton");
         button.disabled = true;
-        Common.ui.setInlineStatus(status, "사용자를 추가하고 있습니다.");
         try {
-            const payload = await Common.api.request("/admin/users", {
+            await Common.api.request(`/admin/users/${encodeURIComponent(id)}/photo`, {
                 method: "POST",
-                body: {
-                    loginId: query("#createUserLoginId").value.trim(),
-                    userName: query("#createUserName").value.trim(),
-                    email: query("#createUserEmail").value.trim(),
-                    roleCode: query("#createUserRoleCode").value,
-                    useYn: query("#createUserUseYn").value
-                },
+                body: formData,
                 signal: controller.signal,
-                loadingMessage: "사용자를 추가하고 있습니다."
+                loadingMessage: "프로필 사진을 저장하고 있습니다."
             });
-            const data = Common.data.get(payload) || {};
-            const password = value(data, "temporaryPassword", "TEMPORARY_PASSWORD", "password", "PASSWORD");
-            if (!password) throw new Error("서버 응답에서 임시 비밀번호를 확인하지 못했습니다.");
-
-            query("#createUserDialog")?.close();
-            form.reset();
-            Common.ui.setInlineStatus(status, "");
-            Common.ui.toast("사용자를 추가했습니다.", "success");
-            showTemporaryPassword(password, data);
-            reloadUsersAfterTemporaryDialog = true;
+            Common.ui.toast("프로필 사진을 저장했습니다.", "success");
+            selectedUserId = String(id);
+            await loadUsers();
         } catch (error) {
             if (error?.name !== "AbortError") {
-                Common.ui.setInlineStatus(status, error.message || "사용자를 추가하지 못했습니다.", "error");
+                Common.ui.setInlineStatus(
+                    query("#userEditorStatus"),
+                    error.message || "프로필 사진을 저장하지 못했습니다.",
+                    "error"
+                );
             }
         } finally {
             button.disabled = false;
         }
     }
 
-    async function deleteUser(id, userLabel, button) {
+    async function deleteUserPhoto() {
+        const id = query("#userId").value;
+        if (!id || !(await Common.ui.confirm(
+            "선택한 임직원의 프로필 사진을 삭제하시겠습니까?",
+            { title: "프로필 사진 삭제", confirmText: "삭제", danger: true }
+        ))) return;
+        const button = query("#deleteUserPhotoButton");
+        button.disabled = true;
+        try {
+            await Common.api.request(`/admin/users/${encodeURIComponent(id)}/photo`, {
+                method: "DELETE",
+                signal: controller.signal,
+                loadingMessage: "프로필 사진을 삭제하고 있습니다."
+            });
+            Common.ui.toast("프로필 사진을 삭제했습니다.", "success");
+            selectedUserId = String(id);
+            await loadUsers();
+        } catch (error) {
+            if (error?.name !== "AbortError") {
+                Common.ui.setInlineStatus(
+                    query("#userEditorStatus"),
+                    error.message || "프로필 사진을 삭제하지 못했습니다.",
+                    "error"
+                );
+            }
+        } finally {
+            button.disabled = false;
+        }
+    }
+
+    async function deleteUser() {
+        const id = query("#userId").value;
+        const userLabel = query("#userName").value.trim() || query("#userLoginId").value.trim();
+        const button = query("#deleteUserButton");
         if (!id) return;
         const confirmed = await Common.ui.confirm(
-            `${userLabel || "선택한 사용자"} 계정을 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
-            { title: "사용자 삭제", confirmText: "삭제", danger: true }
+            `${userLabel || "선택한 임직원"} 계정을 영구 삭제하시겠습니까? 이 작업은 되돌릴 수 없습니다.`,
+            { title: "임직원 삭제", confirmText: "삭제", danger: true }
         );
         if (!confirmed) return;
 
@@ -369,24 +406,38 @@
             await Common.api.request(`/admin/users/${encodeURIComponent(id)}`, {
                 method: "DELETE",
                 signal: controller.signal,
-                loadingMessage: "사용자를 삭제하고 있습니다."
+                loadingMessage: "임직원을 삭제하고 있습니다."
             });
-            Common.ui.toast("사용자를 삭제했습니다.", "success");
+            Common.ui.toast("임직원을 삭제했습니다.", "success");
+            fillUserForm();
             await loadUsers();
         } catch (error) {
             if (error?.name !== "AbortError") {
-                Common.ui.toast(error.message || "사용자를 삭제하지 못했습니다.", "error", { duration: 0 });
+                Common.ui.setInlineStatus(
+                    query("#userEditorStatus"),
+                    error.message || "임직원을 삭제하지 못했습니다.",
+                    "error"
+                );
             }
         } finally {
             button.disabled = false;
         }
     }
 
-    async function resetPassword(id, button) {
-        if (!id || !(await Common.ui.confirm(
-            "선택한 사용자의 비밀번호를 초기화하시겠습니까? 기존 로그인 세션은 모두 종료됩니다.",
-            { title: "비밀번호 초기화", confirmText: "초기화" }
-        ))) return;
+    function openPasswordResetDialog() {
+        const id = query("#userId").value;
+        if (!id) return;
+        pendingPasswordResetUserId = id;
+        query("#resetPasswordUserName").textContent = query("#userName").value.trim()
+            || query("#userLoginId").value.trim()
+            || "선택한 임직원";
+        query("#resetPasswordDialog")?.showModal();
+    }
+
+    async function resetPassword() {
+        const id = pendingPasswordResetUserId;
+        const button = query("#confirmResetPasswordButton");
+        if (!id) return;
         button.disabled = true;
         try {
             const payload = await Common.api.request(`/admin/users/${encodeURIComponent(id)}/reset-password`, {
@@ -398,6 +449,7 @@
             const password = value(data, "temporaryPassword", "TEMPORARY_PASSWORD", "password", "PASSWORD");
             if (!password) throw new Error("서버 응답에서 임시 비밀번호를 확인하지 못했습니다.");
 
+            query("#resetPasswordDialog")?.close();
             showTemporaryPassword(password, data);
             reloadUsersAfterTemporaryDialog = true;
         } catch (error) {
@@ -417,13 +469,49 @@
                 event.preventDefault();
                 loadUsers();
             }, { signal: controller.signal });
-            query("#openCreateUserButton")?.addEventListener("click", () => {
-                query("#createUserForm")?.reset();
-                Common.ui.setInlineStatus(query("#createUserStatus"), "");
-                query("#createUserDialog")?.showModal();
-                query("#createUserLoginId")?.focus();
+            query("#userTableBody")?.addEventListener("click", (event) => {
+                const tableRow = event.target.closest("tr[data-user-id]");
+                const row = users.find((item) => String(userId(item)) === tableRow?.dataset.userId);
+                if (row) selectUser(row);
             }, { signal: controller.signal });
-            query("#createUserForm")?.addEventListener("submit", createUser, {
+            query("#userTableBody")?.addEventListener("keydown", (event) => {
+                if (event.key !== "Enter" && event.key !== " ") return;
+                const tableRow = event.target.closest("tr[data-user-id]");
+                const row = users.find((item) => String(userId(item)) === tableRow?.dataset.userId);
+                if (!row) return;
+                event.preventDefault();
+                selectUser(row);
+            }, { signal: controller.signal });
+            query("#newUserButton")?.addEventListener("click", () => {
+                fillUserForm();
+                query("#userLoginId")?.focus();
+            }, { signal: controller.signal });
+            query("#clearUserButton")?.addEventListener("click", () => {
+                fillUserForm();
+                query("#userLoginId")?.focus();
+            }, { signal: controller.signal });
+            query("#userForm")?.addEventListener("submit", saveUser, {
+                signal: controller.signal
+            });
+            query("#userBirthDate")?.addEventListener("change", updateAge, { signal: controller.signal });
+            query("#userPhotoFile")?.addEventListener("change", previewSelectedPhoto, {
+                signal: controller.signal
+            });
+            query("#uploadUserPhotoButton")?.addEventListener("click", uploadUserPhoto, {
+                signal: controller.signal
+            });
+            query("#deleteUserPhotoButton")?.addEventListener("click", deleteUserPhoto, {
+                signal: controller.signal
+            });
+            query("#userPhotoPreview")?.addEventListener("error", () => {
+                query("#userPhotoPreview").hidden = true;
+                query("#userPhotoPlaceholder").hidden = false;
+            }, { signal: controller.signal });
+            query("#deleteUserButton")?.addEventListener("click", deleteUser, { signal: controller.signal });
+            query("#resetUserPasswordButton")?.addEventListener("click", openPasswordResetDialog, {
+                signal: controller.signal
+            });
+            query("#confirmResetPasswordButton")?.addEventListener("click", resetPassword, {
                 signal: controller.signal
             });
             root.querySelectorAll("[data-dialog-close]").forEach((button) => {
@@ -438,6 +526,10 @@
                     reloadUsersAfterTemporaryDialog = false;
                     loadUsers();
                 }
+            }, { signal: controller.signal });
+            query("#resetPasswordDialog")?.addEventListener("close", () => {
+                pendingPasswordResetUserId = null;
+                query("#resetPasswordUserName").textContent = "";
             }, { signal: controller.signal });
             query("#copyTemporaryPasswordButton")?.addEventListener("click", async () => {
                 await Common.copyText(query("#temporaryPasswordValue").textContent || "");
@@ -455,6 +547,8 @@
                 await Common.copyText(guide);
                 Common.ui.toast("접속 안내문을 복사했습니다.", "success");
             }, { signal: controller.signal });
+            query("#userBirthDate").max = new Date().toISOString().slice(0, 10);
+            fillUserForm();
             await loadUsers();
         },
 
@@ -465,6 +559,9 @@
             users = [];
             temporaryAccess = null;
             reloadUsersAfterTemporaryDialog = false;
+            selectedUserId = null;
+            pendingPasswordResetUserId = null;
+            clearLocalPhotoUrl();
         }
     };
 })();

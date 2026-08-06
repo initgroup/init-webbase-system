@@ -22,8 +22,8 @@ window.MENU_CONFIG = [
             {
                 type: "page",
                 page: "admin-users",
-                label: "사용자 관리",
-                title: "사용자 관리",
+                label: "임직원 관리",
+                title: "임직원 관리",
                 icon: "◇",
                 roles: ["ADMIN"]
             },
@@ -33,6 +33,14 @@ window.MENU_CONFIG = [
                 label: "프로젝트 관리",
                 title: "프로젝트 관리",
                 icon: "▦",
+                roles: ["ADMIN"]
+            },
+            {
+                type: "page",
+                page: "project-assignments",
+                label: "프로젝트 투입",
+                title: "프로젝트 투입",
+                icon: "♙",
                 roles: ["ADMIN"]
             },
             {
@@ -56,6 +64,6 @@ window.MENU_CONFIG = [
 ];
 
 window.PAGE_FILE_CONFIG = {
-    htmlPages: ["login", "home", "account", "admin-users", "admin-projects", "admin-notices", "admin-site-settings"],
-    scriptPages: ["login", "home", "account", "admin-users", "admin-projects", "admin-notices", "admin-site-settings"]
+    htmlPages: ["login", "home", "account", "admin-users", "admin-projects", "project-assignments", "admin-notices", "admin-site-settings"],
+    scriptPages: ["login", "home", "account", "admin-users", "admin-projects", "project-assignments", "admin-notices", "admin-site-settings"]
 };

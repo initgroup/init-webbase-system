@@ -15,74 +15,80 @@
                 <h3 id="projectListTitle">프로젝트 목록</h3>
                 <p>검색 조건은 서버 쿼리에 적용되며, 열 제목을 누르면 정렬할 수 있습니다.</p>
             </div>
+            <div class="project-search-actions">
+                <button id="toggleProjectDetailSearchButton" class="button button-secondary" type="button"
+                        aria-expanded="false" aria-controls="projectDetailSearchFields">상세조회</button>
+                <button id="resetProjectSearchButton" class="button button-secondary" type="button">조건 초기화</button>
+                <button class="button button-primary" type="submit" form="projectSearchForm">조회</button>
+            </div>
         </div>
 
         <form id="projectSearchForm" class="project-search-grid" role="search">
-            <label class="field project-search-keyword">
-                <span>검색어</span>
-                <input id="projectKeyword" class="input" type="search" maxlength="300" placeholder="프로젝트명 또는 발주처">
-            </label>
-            <label class="field">
-                <span>등록연도</span>
-                <input id="projectYearFilter" class="input" type="number" min="1900" max="2100" placeholder="전체">
-            </label>
-            <label class="field">
-                <span>진행상태</span>
-                <select id="projectStatusFilter" class="select">
-                    <option value="ALL">전체</option>
-                    <option value="PLANNED">계획</option>
-                    <option value="BIDDING">입찰</option>
-                    <option value="CONTRACTED">계약</option>
-                    <option value="IN_PROGRESS">진행</option>
-                    <option value="COMPLETED">완료</option>
-                    <option value="CANCELLED">취소</option>
-                </select>
-            </label>
-            <label class="field">
-                <span>참여유형</span>
-                <select id="projectParticipationFilter" class="select">
-                    <option value="ALL">전체</option>
-                    <option value="LEAD">주관사</option>
-                    <option value="CONSORTIUM">컨소사</option>
-                    <option value="SUBCONTRACT">하도급</option>
-                </select>
-            </label>
-            <label class="field">
-                <span>프로젝트 기간 시작</span>
-                <input id="projectPeriodStartFilter" class="input" type="date">
-            </label>
-            <label class="field">
-                <span>프로젝트 기간 종료</span>
-                <input id="projectPeriodEndFilter" class="input" type="date">
-            </label>
-            <label class="field">
-                <span>입찰일 시작</span>
-                <input id="projectBidDateFromFilter" class="input" type="date">
-            </label>
-            <label class="field">
-                <span>입찰일 종료</span>
-                <input id="projectBidDateToFilter" class="input" type="date">
-            </label>
-            <label class="field">
-                <span>최소 수주금액</span>
-                <input id="projectContractAmountMinFilter" class="input" type="number" min="0" max="999999999999999999" step="1" placeholder="VAT 포함">
-            </label>
-            <label class="field">
-                <span>최대 수주금액</span>
-                <input id="projectContractAmountMaxFilter" class="input" type="number" min="0" max="999999999999999999" step="1" placeholder="VAT 포함">
-            </label>
-            <label class="field">
-                <span>페이지당 건수</span>
-                <select id="projectPageSize" class="select">
-                    <option value="10">10</option>
-                    <option value="20" selected>20</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                </select>
-            </label>
-            <div class="project-search-actions">
-                <button id="resetProjectSearchButton" class="button button-secondary" type="button">조건 초기화</button>
-                <button class="button button-primary" type="submit">조회</button>
+            <div class="project-search-primary">
+                <label class="field project-search-keyword">
+                    <span>검색어</span>
+                    <input id="projectKeyword" class="input" type="search" maxlength="300" placeholder="프로젝트명 또는 발주처">
+                </label>
+                <label class="field">
+                    <span>등록연도</span>
+                    <input id="projectYearFilter" class="input" type="number" min="1900" max="2100" placeholder="전체">
+                </label>
+                <label class="field">
+                    <span>진행상태</span>
+                    <select id="projectStatusFilter" class="select">
+                        <option value="ALL">전체</option>
+                        <option value="PLANNED">계획</option>
+                        <option value="BIDDING">입찰</option>
+                        <option value="CONTRACTED">계약</option>
+                        <option value="IN_PROGRESS">진행</option>
+                        <option value="COMPLETED">완료</option>
+                        <option value="CANCELLED">취소</option>
+                    </select>
+                </label>
+            </div>
+            <div id="projectDetailSearchFields" class="project-search-detail" hidden>
+                <label class="field">
+                    <span>참여유형</span>
+                    <select id="projectParticipationFilter" class="select">
+                        <option value="ALL">전체</option>
+                        <option value="LEAD">주관사</option>
+                        <option value="CONSORTIUM">컨소사</option>
+                        <option value="SUBCONTRACT">하도급</option>
+                    </select>
+                </label>
+                <label class="field">
+                    <span>프로젝트 기간 시작</span>
+                    <input id="projectPeriodStartFilter" class="input" type="date">
+                </label>
+                <label class="field">
+                    <span>프로젝트 기간 종료</span>
+                    <input id="projectPeriodEndFilter" class="input" type="date">
+                </label>
+                <label class="field">
+                    <span>입찰일 시작</span>
+                    <input id="projectBidDateFromFilter" class="input" type="date">
+                </label>
+                <label class="field">
+                    <span>입찰일 종료</span>
+                    <input id="projectBidDateToFilter" class="input" type="date">
+                </label>
+                <label class="field">
+                    <span>최소 수주금액</span>
+                    <input id="projectContractAmountMinFilter" class="input" type="number" min="0" max="999999999999999999" step="1" placeholder="VAT 포함">
+                </label>
+                <label class="field">
+                    <span>최대 수주금액</span>
+                    <input id="projectContractAmountMaxFilter" class="input" type="number" min="0" max="999999999999999999" step="1" placeholder="VAT 포함">
+                </label>
+                <label class="field">
+                    <span>페이지당 건수</span>
+                    <select id="projectPageSize" class="select">
+                        <option value="10">10</option>
+                        <option value="20" selected>20</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </label>
             </div>
         </form>
 

@@ -8,6 +8,25 @@ SELECT USER_ID
      , CREATED_AT
      , UPDATED_AT
      , PASSWORD_CHANGE_YN
+     , EMPLOYEE_NO
+     , GENDER_CODE
+     , BIRTH_DATE
+     , BIRTH_CALENDAR_CODE
+     , HIRE_DATE
+     , RETIREMENT_DATE
+     , EMPLOYMENT_STATUS_CODE
+     , EMPLOYMENT_TYPE_CODE
+     , DEPARTMENT_NAME
+     , POSITION_NAME
+     , JOB_TITLE
+     , WORK_LOCATION
+     , MOBILE_PHONE
+     , OFFICE_PHONE
+     , HR_NOTE
+     , PHOTO_FILE_NAME
+     , PHOTO_CONTENT_TYPE
+     , PHOTO_FILE_SIZE
+     , PHOTO_UPDATED_AT
   FROM (
         SELECT USER_ID
              , LOGIN_ID
@@ -18,12 +37,35 @@ SELECT USER_ID
              , CREATED_AT
              , UPDATED_AT
              , PASSWORD_CHANGE_YN
+             , EMPLOYEE_NO
+             , GENDER_CODE
+             , BIRTH_DATE
+             , BIRTH_CALENDAR_CODE
+             , HIRE_DATE
+             , RETIREMENT_DATE
+             , EMPLOYMENT_STATUS_CODE
+             , EMPLOYMENT_TYPE_CODE
+             , DEPARTMENT_NAME
+             , POSITION_NAME
+             , JOB_TITLE
+             , WORK_LOCATION
+             , MOBILE_PHONE
+             , OFFICE_PHONE
+             , HR_NOTE
+             , PHOTO_FILE_NAME
+             , PHOTO_CONTENT_TYPE
+             , PHOTO_FILE_SIZE
+             , PHOTO_UPDATED_AT
           FROM "INIT$_TB_USER"
          WHERE (
                :keyword IS NULL
                OR UPPER(LOGIN_ID) LIKE :keyword
                OR UPPER(USER_NAME) LIKE :keyword
                OR UPPER(EMAIL) LIKE :keyword
+               OR UPPER(EMPLOYEE_NO) LIKE :keyword
+               OR UPPER(DEPARTMENT_NAME) LIKE :keyword
+               OR UPPER(POSITION_NAME) LIKE :keyword
+               OR UPPER(JOB_TITLE) LIKE :keyword
               )
            AND (:useYn = 'ALL' OR USE_YN = :useYn)
          ORDER BY CREATED_AT DESC
@@ -39,6 +81,21 @@ UPDATE "INIT$_TB_USER"
      , EMAIL = :email
      , ROLE_CODE = :roleCode
      , USE_YN = :useYn
+     , EMPLOYEE_NO = :employeeNo
+     , GENDER_CODE = :genderCode
+     , BIRTH_DATE = :birthDate
+     , BIRTH_CALENDAR_CODE = :birthCalendarCode
+     , HIRE_DATE = :hireDate
+     , RETIREMENT_DATE = :retirementDate
+     , EMPLOYMENT_STATUS_CODE = :employmentStatusCode
+     , EMPLOYMENT_TYPE_CODE = :employmentTypeCode
+     , DEPARTMENT_NAME = :departmentName
+     , POSITION_NAME = :positionName
+     , JOB_TITLE = :jobTitle
+     , WORK_LOCATION = :workLocation
+     , MOBILE_PHONE = :mobilePhone
+     , OFFICE_PHONE = :officePhone
+     , HR_NOTE = :hrNote
      , UPDATED_AT = SYSTIMESTAMP
  WHERE USER_ID = :userId
 ;
@@ -48,6 +105,7 @@ SELECT COUNT(*)
   FROM "INIT$_TB_USER"
  WHERE LOGIN_ID = :loginId
     OR LOWER(EMAIL) = LOWER(:email)
+    OR (:employeeNo IS NOT NULL AND EMPLOYEE_NO = :employeeNo)
 ;
 
 -- [ADMIN_USER_INSERT]
@@ -59,6 +117,21 @@ INSERT INTO "INIT$_TB_USER" (
   , ROLE_CODE
   , USE_YN
   , PASSWORD_CHANGE_YN
+  , EMPLOYEE_NO
+  , GENDER_CODE
+  , BIRTH_DATE
+  , BIRTH_CALENDAR_CODE
+  , HIRE_DATE
+  , RETIREMENT_DATE
+  , EMPLOYMENT_STATUS_CODE
+  , EMPLOYMENT_TYPE_CODE
+  , DEPARTMENT_NAME
+  , POSITION_NAME
+  , JOB_TITLE
+  , WORK_LOCATION
+  , MOBILE_PHONE
+  , OFFICE_PHONE
+  , HR_NOTE
   , CREATED_AT
 ) VALUES (
     :loginId
@@ -68,6 +141,21 @@ INSERT INTO "INIT$_TB_USER" (
   , :roleCode
   , :useYn
   , 'N'
+  , :employeeNo
+  , :genderCode
+  , :birthDate
+  , :birthCalendarCode
+  , :hireDate
+  , :retirementDate
+  , :employmentStatusCode
+  , :employmentTypeCode
+  , :departmentName
+  , :positionName
+  , :jobTitle
+  , :workLocation
+  , :mobilePhone
+  , :officePhone
+  , :hrNote
   , SYSTIMESTAMP
 )
 ;
@@ -85,6 +173,7 @@ SELECT COUNT(*)
    AND (
        LOGIN_ID = :loginId
        OR LOWER(EMAIL) = LOWER(:email)
+       OR (:employeeNo IS NOT NULL AND EMPLOYEE_NO = :employeeNo)
        )
 ;
 
@@ -131,4 +220,35 @@ UPDATE "INIT$_TB_AUTH_SESSION"
 -- [ADMIN_USER_DELETE]
 DELETE FROM "INIT$_TB_USER"
  WHERE USER_ID = :userId
+;
+
+-- [ADMIN_USER_PHOTO_UPDATE]
+UPDATE "INIT$_TB_USER"
+   SET PHOTO_FILE_NAME = :photoFileName
+     , PHOTO_CONTENT_TYPE = :photoContentType
+     , PHOTO_FILE_SIZE = :photoFileSize
+     , PHOTO_DATA = :photoData
+     , PHOTO_UPDATED_AT = SYSTIMESTAMP
+     , UPDATED_AT = SYSTIMESTAMP
+ WHERE USER_ID = :userId
+;
+
+-- [ADMIN_USER_PHOTO_DOWNLOAD]
+SELECT PHOTO_CONTENT_TYPE
+     , PHOTO_DATA
+  FROM "INIT$_TB_USER"
+ WHERE USER_ID = :userId
+   AND PHOTO_DATA IS NOT NULL
+;
+
+-- [ADMIN_USER_PHOTO_DELETE]
+UPDATE "INIT$_TB_USER"
+   SET PHOTO_FILE_NAME = NULL
+     , PHOTO_CONTENT_TYPE = NULL
+     , PHOTO_FILE_SIZE = NULL
+     , PHOTO_DATA = NULL
+     , PHOTO_UPDATED_AT = NULL
+     , UPDATED_AT = SYSTIMESTAMP
+ WHERE USER_ID = :userId
+   AND PHOTO_DATA IS NOT NULL
 ;

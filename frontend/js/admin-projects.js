@@ -154,6 +154,15 @@
         return true;
     }
 
+    function setDetailSearchExpanded(expanded) {
+        const fields = query("#projectDetailSearchFields");
+        const button = query("#toggleProjectDetailSearchButton");
+        if (!fields || !button) return;
+        fields.hidden = !expanded;
+        button.setAttribute("aria-expanded", String(expanded));
+        button.textContent = expanded ? "상세조회 접기" : "상세조회";
+    }
+
     async function fetchProjectPage(state) {
         const queryString = Common.api.query({
             ...searchParameters(),
@@ -394,9 +403,14 @@
             }, { signal: controller.signal });
             query("#resetProjectSearchButton")?.addEventListener("click", () => {
                 query("#projectSearchForm")?.reset();
+                setDetailSearchExpanded(false);
                 newProject({ focus: false });
                 grid.setPageSize(query("#projectPageSize").value, { reload: false });
                 grid.load({ resetPage: true });
+            }, { signal: controller.signal });
+            query("#toggleProjectDetailSearchButton")?.addEventListener("click", () => {
+                const expanded = query("#toggleProjectDetailSearchButton").getAttribute("aria-expanded") === "true";
+                setDetailSearchExpanded(!expanded);
             }, { signal: controller.signal });
             query("#newProjectButton")?.addEventListener("click", () => newProject(), {
                 signal: controller.signal

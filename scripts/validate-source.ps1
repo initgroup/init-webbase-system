@@ -124,7 +124,19 @@ if alt_path.exists():
                 f'DDL/ALT ADD column order mismatch for {table_name}: '
                 f'{ddl_tables[table_name]} != {alt_add_columns[table_name]}'
             )
-    print(f'DDL/ALT migration contract OK: {len(common_tables)} tables')
+    incremental_tables = sorted(set(alt_add_columns) - set(common_tables))
+    for table_name in incremental_tables:
+        if table_name not in ddl_tables:
+            raise RuntimeError(f'ALT adds columns to unknown DDL table: {table_name}')
+        added_columns = alt_add_columns[table_name]
+        ddl_suffix = ddl_tables[table_name][-len(added_columns):]
+        if ddl_suffix != added_columns:
+            raise RuntimeError(
+                f'DDL/ALT incremental column order mismatch for {table_name}: '
+                f'{ddl_suffix} != {added_columns}'
+            )
+    checked_tables = len(set(common_tables) | set(incremental_tables))
+    print(f'DDL/ALT migration contract OK: {checked_tables} tables')
 "@
     & $venvPython -c $migrationContractCode
     if ($LASTEXITCODE -ne 0) {

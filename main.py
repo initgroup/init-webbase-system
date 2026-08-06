@@ -28,6 +28,7 @@ from backend.routers import (
     admin_users,
     auth,
     home,
+    project_assignments,
     site_settings,
 )
 
@@ -277,6 +278,11 @@ app.include_router(
     admin_projects.router,
     prefix="/api/admin/projects",
     tags=["admin-projects"],
+)
+app.include_router(
+    project_assignments.router,
+    prefix="/api/project-assignments",
+    tags=["project-assignments"],
 )
 app.include_router(
     admin_notices.router,

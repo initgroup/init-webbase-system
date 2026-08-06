@@ -1,14 +1,18 @@
 from __future__ import annotations
 
 import logging
+import os
 import re
 import secrets
 import string
 from datetime import date, datetime
+from pathlib import Path
 from typing import Any
 
-from fastapi import APIRouter, Depends, HTTPException, Query, Request
+import oracledb
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Response, UploadFile
 from pydantic import BaseModel, ConfigDict, Field
+from starlette.concurrency import run_in_threadpool
 
 from backend.auth_context import get_request_user_id, require_admin_role
 from backend.database import get_db_connection
@@ -21,9 +25,37 @@ router = APIRouter(dependencies=[Depends(require_admin_role)])
 _EMAIL_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 _TEMPORARY_PASSWORD_LENGTH = 16
 _TEMPORARY_PASSWORD_SPECIALS = "!@#$%*-_"
+_GENDER_CODES = {"MALE", "FEMALE", "OTHER", "UNDISCLOSED"}
+_BIRTH_CALENDAR_CODES = {"SOLAR", "LUNAR"}
+_EMPLOYMENT_STATUS_CODES = {"ACTIVE", "LEAVE", "RETIRED"}
+_EMPLOYMENT_TYPE_CODES = {"REGULAR", "CONTRACT", "EXECUTIVE", "INTERN", "DISPATCH", "OTHER"}
+_PHOTO_TYPES = {
+    "image/jpeg": (b"\xff\xd8\xff",),
+    "image/png": (b"\x89PNG\r\n\x1a\n",),
+    "image/gif": (b"GIF87a", b"GIF89a"),
+    "image/webp": (b"RIFF",),
+}
 
 
-class UserUpdateRequest(BaseModel):
+class EmployeeProfileRequest(BaseModel):
+    employeeNo: str | None = Field(default=None, max_length=100)
+    genderCode: str | None = Field(default=None, max_length=20)
+    birthDate: date | None = None
+    birthCalendarCode: str = Field(default="SOLAR", max_length=20)
+    hireDate: date | None = None
+    retirementDate: date | None = None
+    employmentStatusCode: str = Field(default="ACTIVE", max_length=30)
+    employmentTypeCode: str | None = Field(default=None, max_length=30)
+    departmentName: str | None = Field(default=None, max_length=200)
+    positionName: str | None = Field(default=None, max_length=100)
+    jobTitle: str | None = Field(default=None, max_length=100)
+    workLocation: str | None = Field(default=None, max_length=200)
+    mobilePhone: str | None = Field(default=None, max_length=50)
+    officePhone: str | None = Field(default=None, max_length=50)
+    hrNote: str | None = Field(default=None, max_length=2000)
+
+
+class UserUpdateRequest(EmployeeProfileRequest):
     loginId: str = Field(max_length=100)
     userName: str = Field(max_length=200)
     email: str = Field(max_length=300)
@@ -32,7 +64,7 @@ class UserUpdateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
 
-class UserCreateRequest(BaseModel):
+class UserCreateRequest(EmployeeProfileRequest):
     loginId: str = Field(max_length=100)
     userName: str = Field(max_length=200)
     email: str = Field(max_length=300)
@@ -44,6 +76,8 @@ class UserCreateRequest(BaseModel):
 def _serialize(value: Any) -> Any:
     if isinstance(value, (datetime, date)):
         return value.isoformat()
+    if hasattr(value, "read"):
+        return value.read()
     return value
 
 
@@ -114,6 +148,79 @@ def _validated_user_values(
     return login_id, user_name, email, role_code, use_yn
 
 
+def _optional_text(value: str | None) -> str | None:
+    normalized = str(value or "").strip()
+    return normalized or None
+
+
+def _optional_code(value: str | None, allowed: set[str], field_name: str) -> str | None:
+    normalized = str(value or "").strip().upper()
+    if not normalized:
+        return None
+    if normalized not in allowed:
+        raise HTTPException(status_code=400, detail=f"Unsupported {field_name}.")
+    return normalized
+
+
+def _profile_values(payload: EmployeeProfileRequest) -> dict[str, Any]:
+    birth_calendar_code = str(payload.birthCalendarCode or "SOLAR").strip().upper()
+    employment_status_code = str(payload.employmentStatusCode or "ACTIVE").strip().upper()
+    if birth_calendar_code not in _BIRTH_CALENDAR_CODES:
+        raise HTTPException(status_code=400, detail="Unsupported birthCalendarCode.")
+    if employment_status_code not in _EMPLOYMENT_STATUS_CODES:
+        raise HTTPException(status_code=400, detail="Unsupported employmentStatusCode.")
+    if payload.birthDate and payload.birthDate > date.today():
+        raise HTTPException(status_code=400, detail="birthDate must not be in the future.")
+    if payload.hireDate and payload.retirementDate and payload.retirementDate < payload.hireDate:
+        raise HTTPException(status_code=400, detail="retirementDate must not be earlier than hireDate.")
+    return {
+        "employeeNo": _optional_text(payload.employeeNo),
+        "genderCode": _optional_code(payload.genderCode, _GENDER_CODES, "genderCode"),
+        "birthDate": payload.birthDate,
+        "birthCalendarCode": birth_calendar_code,
+        "hireDate": payload.hireDate,
+        "retirementDate": payload.retirementDate,
+        "employmentStatusCode": employment_status_code,
+        "employmentTypeCode": _optional_code(
+            payload.employmentTypeCode,
+            _EMPLOYMENT_TYPE_CODES,
+            "employmentTypeCode",
+        ),
+        "departmentName": _optional_text(payload.departmentName),
+        "positionName": _optional_text(payload.positionName),
+        "jobTitle": _optional_text(payload.jobTitle),
+        "workLocation": _optional_text(payload.workLocation),
+        "mobilePhone": _optional_text(payload.mobilePhone),
+        "officePhone": _optional_text(payload.officePhone),
+        "hrNote": _optional_text(payload.hrNote),
+    }
+
+
+def _photo_max_bytes() -> int:
+    try:
+        configured_bytes = int(os.getenv("APP_USER_PHOTO_MAX_BYTES", str(5 * 1024 * 1024)))
+    except (TypeError, ValueError):
+        configured_bytes = 5 * 1024 * 1024
+    return max(1024, min(configured_bytes, 10 * 1024 * 1024))
+
+
+def _validated_photo_type(content_type: str, file_data: bytes) -> str:
+    normalized = str(content_type or "").split(";", 1)[0].strip().lower()
+    signatures = _PHOTO_TYPES.get(normalized)
+    signature_matches = signatures and any(file_data.startswith(signature) for signature in signatures)
+    if normalized == "image/webp":
+        signature_matches = signature_matches and len(file_data) >= 12 and file_data[8:12] == b"WEBP"
+    if not signature_matches:
+        raise HTTPException(status_code=400, detail="Only valid JPEG, PNG, GIF, or WebP images are allowed.")
+    return normalized
+
+
+def _safe_photo_name(value: str) -> str:
+    file_name = Path(str(value or "profile-image")).name
+    file_name = re.sub(r"[\x00-\x1f\x7f]+", "_", file_name).strip()
+    return file_name[:500] or "profile-image"
+
+
 @router.post("")
 def create_user(payload: UserCreateRequest):
     login_id, user_name, email, role_code, use_yn = _validated_user_values(
@@ -123,6 +230,7 @@ def create_user(payload: UserCreateRequest):
         payload.roleCode,
         payload.useYn,
     )
+    profile = _profile_values(payload)
     temporary_password = _temporary_password()
     conn = None
     cursor = None
@@ -132,7 +240,7 @@ def create_user(payload: UserCreateRequest):
         cursor.execute(SqlLoader.get_sql("ADMIN_USER_TABLE_LOCK"))
         cursor.execute(
             SqlLoader.get_sql("ADMIN_USER_CREATE_DUPLICATE_COUNT"),
-            {"loginId": login_id, "email": email},
+            {"loginId": login_id, "email": email, "employeeNo": profile["employeeNo"]},
         )
         if int(cursor.fetchone()[0] or 0) > 0:
             raise HTTPException(
@@ -149,6 +257,7 @@ def create_user(payload: UserCreateRequest):
                 "passwordHash": hash_password(temporary_password),
                 "roleCode": role_code,
                 "useYn": use_yn,
+                **profile,
             },
         )
         cursor.execute(
@@ -171,6 +280,7 @@ def create_user(payload: UserCreateRequest):
                 "roleCode": role_code,
                 "useYn": use_yn,
                 "passwordChangeYn": "N",
+                **profile,
                 "temporaryPassword": temporary_password,
                 "passwordPolicy": _password_policy(existing_sessions_revoked=False),
             },
@@ -230,6 +340,7 @@ def update_user(user_id: int, payload: UserUpdateRequest, request: Request):
         payload.roleCode,
         payload.useYn,
     )
+    profile = _profile_values(payload)
     if actor_user_id == user_id and (role_code != "ADMIN" or use_yn != "Y"):
         raise HTTPException(status_code=400, detail="You cannot remove your own active administrator access.")
 
@@ -263,7 +374,12 @@ def update_user(user_id: int, payload: UserUpdateRequest, request: Request):
 
         cursor.execute(
             SqlLoader.get_sql("ADMIN_USER_DUPLICATE_COUNT"),
-            {"loginId": login_id, "email": email, "userId": user_id},
+            {
+                "loginId": login_id,
+                "email": email,
+                "employeeNo": profile["employeeNo"],
+                "userId": user_id,
+            },
         )
         if int(cursor.fetchone()[0] or 0) > 0:
             raise HTTPException(
@@ -280,6 +396,7 @@ def update_user(user_id: int, payload: UserUpdateRequest, request: Request):
                 "roleCode": role_code,
                 "useYn": use_yn,
                 "userId": user_id,
+                **profile,
             },
         )
         if cursor.rowcount <= 0:
@@ -299,6 +416,7 @@ def update_user(user_id: int, payload: UserUpdateRequest, request: Request):
                 "email": email,
                 "roleCode": role_code,
                 "useYn": use_yn,
+                **profile,
             },
         }
     except HTTPException:
@@ -310,6 +428,136 @@ def update_user(user_id: int, payload: UserUpdateRequest, request: Request):
             conn.rollback()
         logger.exception("Administrator user update failed.")
         raise HTTPException(status_code=500, detail="User could not be updated.") from exc
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+def _store_user_photo(
+    user_id: int,
+    file_name: str,
+    content_type: str,
+    file_data: bytes,
+) -> dict[str, Any]:
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.setinputsizes(photoData=oracledb.DB_TYPE_BLOB)
+        cursor.execute(
+            SqlLoader.get_sql("ADMIN_USER_PHOTO_UPDATE"),
+            {
+                "photoFileName": file_name,
+                "photoContentType": content_type,
+                "photoFileSize": len(file_data),
+                "photoData": file_data,
+                "userId": user_id,
+            },
+        )
+        if cursor.rowcount <= 0:
+            raise HTTPException(status_code=404, detail="User was not found.")
+        conn.commit()
+        return {
+            "status": "success",
+            "data": {
+                "userId": user_id,
+                "photoFileName": file_name,
+                "photoContentType": content_type,
+                "photoFileSize": len(file_data),
+            },
+        }
+    except HTTPException:
+        if conn:
+            conn.rollback()
+        raise
+    except Exception as exc:
+        if conn:
+            conn.rollback()
+        logger.exception("Employee profile photo upload failed.")
+        raise HTTPException(status_code=500, detail="Profile photo could not be uploaded.") from exc
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@router.post("/{user_id}/photo")
+async def upload_user_photo(user_id: int, file: UploadFile = File(...)):
+    max_bytes = _photo_max_bytes()
+    try:
+        file_data = await file.read(max_bytes + 1)
+        if not file_data:
+            raise HTTPException(status_code=400, detail="Profile photo is empty.")
+        if len(file_data) > max_bytes:
+            raise HTTPException(status_code=413, detail="Profile photo exceeds the server size limit.")
+        content_type = _validated_photo_type(file.content_type or "", file_data)
+        file_name = _safe_photo_name(file.filename or "profile-image")
+        return await run_in_threadpool(
+            _store_user_photo,
+            user_id,
+            file_name,
+            content_type,
+            file_data,
+        )
+    finally:
+        await file.close()
+
+
+@router.get("/{user_id}/photo")
+def get_user_photo(user_id: int):
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(SqlLoader.get_sql("ADMIN_USER_PHOTO_DOWNLOAD"), {"userId": user_id})
+        row = cursor.fetchone()
+        if not row:
+            raise HTTPException(status_code=404, detail="Profile photo was not found.")
+        file_data = _serialize(row[1]) or b""
+        if isinstance(file_data, str):
+            file_data = file_data.encode("utf-8")
+        return Response(
+            content=file_data,
+            media_type=row[0] or "application/octet-stream",
+            headers={
+                "Cache-Control": "private, no-store",
+                "X-Content-Type-Options": "nosniff",
+                "Content-Security-Policy": "default-src 'none'; sandbox",
+            },
+        )
+    finally:
+        if cursor:
+            cursor.close()
+        if conn:
+            conn.close()
+
+
+@router.delete("/{user_id}/photo")
+def delete_user_photo(user_id: int):
+    conn = None
+    cursor = None
+    try:
+        conn = get_db_connection()
+        cursor = conn.cursor()
+        cursor.execute(SqlLoader.get_sql("ADMIN_USER_PHOTO_DELETE"), {"userId": user_id})
+        if cursor.rowcount <= 0:
+            raise HTTPException(status_code=404, detail="Profile photo was not found.")
+        conn.commit()
+        return {"status": "success", "data": {"userId": user_id}}
+    except HTTPException:
+        if conn:
+            conn.rollback()
+        raise
+    except Exception as exc:
+        if conn:
+            conn.rollback()
+        logger.exception("Employee profile photo delete failed.")
+        raise HTTPException(status_code=500, detail="Profile photo could not be deleted.") from exc
     finally:
         if cursor:
             cursor.close()

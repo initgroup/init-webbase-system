@@ -18,6 +18,9 @@
     "terminal.integrated.automationProfile.windows": {
         "path": "powershell.exe"
     },
+    "terminal.integrated.env.windows": {
+        "UVICORN_PORT": "8100"
+    },
     "files.encoding": "utf8",
     "files.autoGuessEncoding": false,
     "files.eol": "\n",

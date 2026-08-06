@@ -24,14 +24,15 @@
         },
         {
             "label": "INIT Members: Run Server",
-            "type": "shell",
+            "type": "process",
             "command": "powershell",
             "args": [
+                "-NoExit",
                 "-NoProfile",
                 "-ExecutionPolicy",
                 "Bypass",
-                "-File",
-                "${workspaceFolder}\\scripts\\run-server.ps1"
+                "-Command",
+                "Set-Location -LiteralPath '${workspaceFolder}'; . '${workspaceFolder}\\venv\\Scripts\\Activate.ps1'; & '${workspaceFolder}\\scripts\\run-server.ps1'"
             ],
             "options": {
                 "cwd": "${workspaceFolder}"
